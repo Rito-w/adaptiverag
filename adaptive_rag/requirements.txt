@@ -1,0 +1,13 @@
+pyyaml>=6.0
+transformers>=4.0
+sentence-transformers>=2.2.2
+faiss-cpu>=1.8.0 # 或 faiss-gpu 如果您有GPU
+pyserini>=0.23.0 # 如果使用BM25
+scikit-learn>=1.0 # 用于一些简单的文本处理或相似度计算
+numpy>=1.20
+torch>=1.10.0 # 如果使用Pytorch模型
+# 如果使用通义千问API或模型，可能需要特定的SDK
+# 例如：pip install dashscope 或者 modelscope
+# 如果需要FastChat或vLLM，也需要额外安装
+# fastchat[model_worker,webui]
+# vllm 

@@ -1,0 +1,41 @@
+llm:
+  default_model: "qwen-7b-chat" # 默认使用通义千问 7B
+  providers:
+    qwen:
+      model_path: "/path/to/qwen-7b-chat" # 替换为您的模型路径
+      api_key: "YOUR_QWEN_API_KEY" # 替换为您的API Key
+      # 其他通义千问特有配置
+    openai:
+      model_name: "gpt-3.5-turbo"
+      api_key: "YOUR_OPENAI_API_KEY"
+      # 其他OpenAI特有配置
+
+# 查询分析与分解模块配置
+query_analyzer:
+  default_decomposer_model: "qwen-7b-chat" # 同样可以使用LLM进行分解
+  default_strategy_router_model: "rule_based_classifier" # 也可以是小型分类模型或基于规则
+  decomposition_threshold: 0.7 # 判断是否需要分解的阈值
+
+# 检索模块配置
+retriever:
+  default_dense_model: "bge-base-en-v1.5" # 密集检索模型
+  default_sparse_model: "bm25" # 稀疏检索模型 (例如: bm25, pyserini)
+  default_index_path: "indexes/default_corpus_index" # 默认索引路径
+
+# 重排序与聚合模块配置
+refiner:
+  default_reranker_model: "bge-reranker-base" # 重排序模型
+  aggregation_strategy: "diverse_coverage" # 聚合策略
+  max_context_length: 4096 # 聚合后最大上下文长度
+
+# 生成模块配置 (通常使用llm的配置)
+generator:
+  default_model: "qwen-7b-chat" # 生成器直接使用LLM
+
+# 评估模块配置
+evaluator:
+  default_metrics: ["rouge", "f1", "exact_match"] # 默认评估指标
+
+# 其他通用配置
+logging_level: "INFO"
+cache_enabled: true 

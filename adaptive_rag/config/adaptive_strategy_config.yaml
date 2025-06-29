@@ -1,0 +1,23 @@
+retrieval_strategy:
+  type: "dynamic_hybrid" # 可以是 "dynamic_hybrid", "keyword_first", "vector_first" 等
+  dynamic_hybrid:
+    query_complexity_mapping: # 根据查询复杂度映射关键词/向量权重
+      simple_fact: {keyword_weight: 0.2, vector_weight: 0.8}
+      complex_reasoning: {keyword_weight: 0.5, vector_weight: 0.5}
+      entity_heavy: {keyword_weight: 0.8, vector_weight: 0.2}
+      # 可以添加更多类型
+    default_keyword_limit: 10 # 关键词搜索默认返回数量
+    default_vector_limit: 20  # 向量搜索默认返回数量
+
+# 子任务分解策略
+decomposition_strategy:
+  enabled: true
+  min_tokens_for_decomposition: 50 # 超过多少token才考虑分解
+  max_sub_queries: 3 # 最多分解成多少个子查询
+
+# 重排序与聚合策略配置
+aggregation_strategy:
+  re_ranking_threshold: 0.6 # 重排序后的相关度阈值
+  diversity_score_weight: 0.2 # 考虑文档多样性的权重
+  max_final_documents: 5 # 最终聚合的文档数量
+  redundancy_threshold: 0.9 # 文档相似度超过此值则认为冗余 
