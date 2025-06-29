@@ -357,31 +357,118 @@ def create_ui() -> gr.Blocks:
     
     # 自定义 CSS
     custom_css = """
-    .gradio-container {
-        max-width: 1200px !important;
+    /* Gradio 容器和主内容区域应占据全宽，移除最大宽度限制和自动边距 */
+    .gradio-container, .main, .container {
+        max-width: none !important; /* 移除最大宽度限制 */
+        margin: 0 !important; /* 移除自动边距 */
+        padding: 0 !important; /* 移除内边距，确保内容贴边 */
     }
+
     .tab-nav {
         background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 8px 8px 0 0;
     }
+
+    /* 按钮样式优化 */
     .primary-button {
         background: linear-gradient(45deg, #667eea, #764ba2);
         border: none;
         color: white;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .primary-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    /* 确保整个页面无留白 */
+    body {
+        margin: 0 !important; /* 移除自动边距 */
+        max-width: none !important; /* 移除最大宽度限制 */
+        padding: 0 !important; /* 移除内边距 */
+    }
+
+    /* 标题区域居中 */
+    .title-container {
+        text-align: center;
+        margin: 0; /* 调整为0，让它自己控制宽度 */
+        padding: 30px 20px; /* 增加上下内边距，左右保持一致 */
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        width: 100%; /* 确保标题容器也占据全宽 */
+        box-sizing: border-box; /* 确保 padding 不会增加总宽度 */
+    }
+
+    /* 标签页样式优化 */
+    .tab-item {
+        border-radius: 8px;
+        margin: 2px;
+        flex-grow: 1; /* 让标签页项目等宽分布 */
+    }
+
+    /* 输入框和按钮样式优化 */
+    .gr-textbox, .gr-slider {
+        border-radius: 6px;
+        border: 1px solid #e1e5e9;
+    }
+
+    .gr-button {
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+        .gradio-container, .main, .container {
+            max-width: 100% !important;
+            padding: 10px !important;
+        }
+
+        .title-container {
+            margin: 0; /* 调整为0 */
+            padding: 15px;
+        }
     }
     """
     
     with gr.Blocks(
         title="🧠 智能自适应 RAG 系统",
-        theme=gr.themes.Soft(),
-        css=custom_css
+        theme=gr.themes.Soft(
+            primary_hue="blue",
+            secondary_hue="purple",
+            neutral_hue="slate",
+            spacing_size="md",
+            radius_size="md"
+        ),
+        css=custom_css,
+        head="""
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body {
+                margin: 0 auto !important;
+                max-width: 1200px !important;
+                background-color: #f8fafc;
+            }
+        </style>
+        """
     ) as demo:
         
         # 标题和介绍
         gr.HTML("""
-        <div style="text-align: center; margin-bottom: 20px;">
-            <h1>🧠 智能自适应 RAG 系统</h1>
-            <h3>基于任务分解和动态检索策略的增强检索生成系统</h3>
-            <p>借鉴 FlashRAG、LightRAG、GraphRAG 等优秀框架，融合创新的自适应检索技术</p>
+        <div class="title-container">
+            <h1 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: 700;">
+                🧠 智能自适应 RAG 系统
+            </h1>
+            <h3 style="margin: 0 0 15px 0; font-size: 1.3em; font-weight: 400; opacity: 0.9;">
+                基于任务分解和动态检索策略的增强检索生成系统
+            </h3>
+            <p style="margin: 0; font-size: 1em; opacity: 0.8; line-height: 1.6;">
+                借鉴 FlashRAG、FlexRAG、LevelRAG 等优秀框架，融合创新的自适应检索技术
+            </p>
         </div>
         """)
         
