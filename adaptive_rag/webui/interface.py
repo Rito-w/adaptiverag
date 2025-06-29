@@ -23,90 +23,63 @@ import os
 # 添加项目路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from adaptive_rag.config import create_default_config, ConfigManager
-from adaptive_rag.task_decomposer import TaskDecomposer
-from adaptive_rag.retrieval_planner import RetrievalPlanner
-from adaptive_rag.multi_retriever import MultiModalRetriever
-from adaptive_rag.data_manager import DataManager
+from adaptive_rag.config import create_flexrag_integrated_config, FLEXRAG_AVAILABLE
+from adaptive_rag.core.flexrag_integrated_assistant import FlexRAGIntegratedAssistant
 
 
 class AdaptiveRAGEngine:
     """智能自适应 RAG 引擎 - 借鉴 FlashRAG 的 Engine 设计"""
     
     def __init__(self):
-        self.config = create_default_config()
-        self.config_manager = ConfigManager()
-        
-        # 初始化组件
-        self.task_decomposer = None
-        self.retrieval_planner = None
-        self.multi_retriever = None
-        self.data_manager = None
-        
+        self.config = create_flexrag_integrated_config()
+
+        # 初始化 FlexRAG 集成助手
+        self.assistant = FlexRAGIntegratedAssistant(self.config)
+
+        # 获取系统信息
+        self.system_info = self.assistant.get_system_info()
+
         # 状态管理
-        self.is_initialized = False
+        self.is_initialized = True
         self.current_query = ""
         self.last_results = None
+
+        print(f"✅ AdaptiveRAG 引擎初始化完成")
+        print(f"   FlexRAG 可用: {'是' if FLEXRAG_AVAILABLE else '否'}")
+        print(f"   助手类型: {self.system_info['assistant_type']}")
+        print(f"   支持功能: {', '.join(self.system_info['supported_features'])}")
         
     def initialize_components(self):
-        """初始化所有组件"""
-        if not self.is_initialized:
-            print("🔧 正在初始化组件...")
-
-            # 初始化数据管理器并加载数据
-            self.data_manager = DataManager(self.config)
-            doc_count = self.data_manager.load_corpus()
-            print(f"✅ 数据管理器初始化完成，加载了 {doc_count} 个文档")
-
-            # 初始化其他组件
-            self.task_decomposer = TaskDecomposer(self.config)
-            self.retrieval_planner = RetrievalPlanner(self.config)
-            self.multi_retriever = MultiModalRetriever(self.config)
-
-            # 确保 multi_retriever 使用同一个数据管理器实例
-            self.multi_retriever.data_manager = self.data_manager
-
-            print("✅ 所有组件初始化完成")
-            self.is_initialized = True
+        """初始化所有组件（FlexRAG 集成版本中已自动完成）"""
+        # FlexRAG 集成助手已经在 __init__ 中完成了所有初始化
+        pass
     
     def process_query(self, query: str, show_details: bool = True) -> Dict[str, Any]:
-        """处理查询"""
-        if not self.is_initialized:
-            self.initialize_components()
-        
+        """处理查询 - 使用 FlexRAG 集成助手"""
         start_time = time.time()
-        
-        # 任务分解
-        subtasks = self.task_decomposer.decompose_query(query)
-        
-        # 检索策略规划
-        plans = self.retrieval_planner.plan_retrieval_strategy(subtasks)
-        
-        # 多模态检索
-        all_results = []
-        for subtask in subtasks:
-            plan = plans[subtask.id]
-            results = self.multi_retriever.adaptive_retrieve(subtask, plan)
-            all_results.extend(results)
-        
-        # 结果聚合
-        final_results = sorted(all_results, key=lambda x: x.score, reverse=True)[:10]
-        
+
+        # 使用 FlexRAG 集成助手处理查询
+        result = self.assistant.answer(query)
+
         processing_time = time.time() - start_time
-        
-        result = {
+
+        # 转换为 Web UI 兼容的格式
+        web_result = {
             "query": query,
-            "subtasks": subtasks,
-            "plans": plans,
-            "results": final_results,
+            "answer": result.answer,
+            "subtasks": result.subtasks,
+            "retrieval_results": result.retrieval_results,
+            "ranking_results": result.ranking_results,
+            "generation_result": result.generation_result,
             "processing_time": processing_time,
-            "total_results": len(all_results)
+            "total_time": result.total_time,
+            "metadata": result.metadata
         }
-        
+
         self.current_query = query
-        self.last_results = result
-        
-        return result
+        self.last_results = web_result
+
+        return web_result
 
 
 def create_basic_tab(engine: AdaptiveRAGEngine) -> Dict[str, gr.Component]:
@@ -122,19 +95,19 @@ def create_basic_tab(engine: AdaptiveRAGEngine) -> Dict[str, gr.Component]:
                 
                 dense_model_path = gr.Textbox(
                     label="向量检索模型路径",
-                    value=engine.config.model_paths["dense_retriever"],
+                    value="./adaptive_rag/models/e5-base-v2",
                     placeholder="/path/to/dense/model"
                 )
-                
+
                 generator_model_path = gr.Textbox(
-                    label="生成模型路径", 
-                    value=engine.config.model_paths["generator"],
+                    label="生成模型路径",
+                    value="./adaptive_rag/models/qwen1.5-1.8b",
                     placeholder="/path/to/generator/model"
                 )
-                
+
                 reranker_model_path = gr.Textbox(
                     label="重排序模型路径",
-                    value=engine.config.model_paths["reranker"],
+                    value="./adaptive_rag/models/bge-reranker-base",
                     placeholder="/path/to/reranker/model"
                 )
             
@@ -144,16 +117,16 @@ def create_basic_tab(engine: AdaptiveRAGEngine) -> Dict[str, gr.Component]:
                 
                 corpus_path = gr.Textbox(
                     label="语料库路径",
-                    value=engine.config.data_paths["corpus_path"],
+                    value="./adaptive_rag/data/general_knowledge.jsonl",
                     placeholder="/path/to/corpus.jsonl"
                 )
-                
+
                 index_path = gr.Textbox(
                     label="索引路径",
-                    value=engine.config.data_paths["index_path"],
+                    value="./adaptive_rag/data/e5_Flat.index",
                     placeholder="/path/to/index"
                 )
-                
+
                 batch_size = gr.Slider(
                     minimum=1,
                     maximum=32,
@@ -498,47 +471,75 @@ def create_ui() -> gr.Blocks:
                 # 格式化结果
                 search_output = f"查询: {result['query']}\n"
                 search_output += f"处理时间: {result['processing_time']:.2f}秒\n"
-                search_output += f"总结果数: {result['total_results']}\n\n"
 
-                search_output += "=== 检索结果 ===\n"
-                for i, doc in enumerate(result['results'][:max_results], 1):
-                    search_output += f"\n{i}. [{doc.retriever_type}] 分数: {doc.score:.3f}\n"
-                    search_output += f"   内容: {doc.content[:200]}...\n"
-                    if hasattr(doc, 'metadata') and doc.metadata:
-                        search_output += f"   元数据: {doc.metadata}\n"
+                # 计算总结果数
+                total_docs = 0
+                if 'retrieval_results' in result:
+                    total_docs = sum(len(r.contexts) for r in result['retrieval_results'])
+
+                search_output += f"总结果数: {total_docs}\n"
+                search_output += f"答案: {result.get('answer', '未生成答案')}\n\n"
+
+                search_output += "=== 检索结果详情 ===\n"
+
+                # 显示检索结果
+                if 'retrieval_results' in result:
+                    for i, retrieval_result in enumerate(result['retrieval_results'], 1):
+                        search_output += f"\n--- 子任务 {i}: {retrieval_result.query} ---\n"
+                        for j, doc in enumerate(retrieval_result.contexts[:max_results], 1):
+                            search_output += f"{j}. 分数: {doc.score:.3f}\n"
+                            search_output += f"   内容: {doc.content[:200]}...\n"
+                            if hasattr(doc, 'metadata') and doc.metadata:
+                                search_output += f"   元数据: {doc.metadata}\n"
 
                 # 任务分解信息
                 task_info = {
-                    "subtasks": [
-                        {
-                            "id": st.id,
-                            "content": st.content,
-                            "type": st.task_type.value,
-                            "priority": st.priority,
-                            "entities": st.entities,
-                            "temporal_info": st.temporal_info
-                        }
-                        for st in result['subtasks']
-                    ]
+                    "subtasks": []
                 }
+
+                if 'subtasks' in result and result['subtasks']:
+                    task_info["subtasks"] = [
+                        {
+                            "id": getattr(st, 'id', f"task_{i}"),
+                            "content": getattr(st, 'content', str(st)),
+                            "type": getattr(st, 'task_type', 'unknown').value if hasattr(getattr(st, 'task_type', None), 'value') else str(getattr(st, 'task_type', 'unknown')),
+                            "priority": getattr(st, 'priority', 1.0),
+                            "entities": getattr(st, 'entities', []),
+                            "temporal_info": getattr(st, 'temporal_info', {})
+                        }
+                        for i, st in enumerate(result['subtasks'])
+                    ]
 
                 # 检索策略信息
                 strategy_info = {
-                    plan_id: {
-                        "weights": plan.weights,
-                        "top_k": plan.top_k_per_retriever,
-                        "fusion_method": plan.fusion_method,
-                        "confidence": plan.confidence
-                    }
-                    for plan_id, plan in result['plans'].items()
+                    "retrieval_results": []
                 }
+
+                if 'retrieval_results' in result:
+                    strategy_info["retrieval_results"] = [
+                        {
+                            "query": r.query,
+                            "contexts_count": len(r.contexts),
+                            "retrieval_time": r.retrieval_time,
+                            "retriever_type": r.retriever_type,
+                            "metadata": getattr(r, 'metadata', {})
+                        }
+                        for r in result['retrieval_results']
+                    ]
+
+                # 计算结果统计
+                total_docs = 0
+                if 'retrieval_results' in result:
+                    total_docs = sum(len(r.contexts) for r in result['retrieval_results'])
+
+                displayed_docs = min(max_results, total_docs)
 
                 return (
                     search_output,
                     gr.update(value=json.dumps(task_info, ensure_ascii=False, indent=2), visible=True),
                     gr.update(value=json.dumps(strategy_info, ensure_ascii=False, indent=2), visible=True),
                     f"{result['processing_time']:.2f} 秒",
-                    f"共 {result['total_results']} 个结果，显示前 {min(max_results, len(result['results']))} 个"
+                    f"共 {total_docs} 个结果，显示前 {displayed_docs} 个"
                 )
 
             except Exception as e:
@@ -632,13 +633,13 @@ def create_ui() -> gr.Blocks:
             """重置配置处理器"""
             try:
                 # 重置为默认值
-                config = create_default_config()
+                config = create_flexrag_integrated_config()
                 return (
-                    config.model_paths["dense_retriever"],
-                    config.model_paths["generator"],
-                    config.model_paths["reranker"],
-                    config.data_paths["corpus_path"],
-                    config.data_paths["index_path"],
+                    "./adaptive_rag/models/e5-base-v2",
+                    "./adaptive_rag/models/qwen1.5-1.8b",
+                    "./adaptive_rag/models/bge-reranker-base",
+                    "./adaptive_rag/data/general_knowledge.jsonl",
+                    "./adaptive_rag/data/e5_Flat.index",
                     config.batch_size,
                     "✅ 配置已重置为默认值"
                 )

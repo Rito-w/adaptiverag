@@ -2,13 +2,23 @@
 """
 === 智能自适应 RAG 配置模块 ===
 
-基于 FlashRAG 的配置系统，扩展支持自适应检索配置
+深度集成 FlexRAG 组件的配置系统
 """
 
 import os
 import yaml
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
+
+# 导入 FlexRAG 组件配置
+try:
+    from flexrag.retriever import RetrieverConfig, RETRIEVERS
+    from flexrag.ranker import RankerConfig, RANKERS
+    from flexrag.models import GeneratorConfig, EncoderConfig, GENERATORS, ENCODERS
+    FLEXRAG_AVAILABLE = True
+except ImportError:
+    print("⚠️ FlexRAG 未安装，将使用简化配置")
+    FLEXRAG_AVAILABLE = False
 
 
 @dataclass
@@ -84,15 +94,16 @@ class ContextAggregationConfig:
     enable_conflict_resolution: bool = True
 
 
+# 首先定义基础配置类（保持向后兼容）
 @dataclass
 class AdaptiveRAGConfig:
-    """智能自适应 RAG 总配置"""
-    
+    """智能自适应 RAG 总配置（原始版本）"""
+
     # 基础配置
     device: str = "cuda"
     batch_size: int = 4
     max_input_length: int = 2048
-    
+
     # 模型路径配置 - 使用 adaptive_rag 内部相对路径
     model_paths: Dict[str, str] = field(default_factory=lambda: {
         "keyword_retriever": "bm25",
@@ -105,6 +116,116 @@ class AdaptiveRAGConfig:
     data_paths: Dict[str, str] = field(default_factory=lambda: {
         "corpus_path": "./adaptive_rag/data/general_knowledge.jsonl",
         "index_path": "./adaptive_rag/data/e5_Flat.index"
+    })
+
+    # 任务类型特定权重
+    task_specific_weights: Dict[str, Dict[str, float]] = field(default_factory=lambda: {
+        "factual": {"keyword": 0.7, "dense": 0.2, "web": 0.1},
+        "semantic": {"keyword": 0.2, "dense": 0.7, "web": 0.1},
+        "temporal": {"keyword": 0.3, "dense": 0.2, "web": 0.5},
+        "comparative": {"keyword": 0.4, "dense": 0.4, "web": 0.2}
+    })
+
+    # 生成配置
+    generation_params: Dict[str, Any] = field(default_factory=lambda: {
+        "do_sample": True,
+        "max_tokens": 256,
+        "temperature": 0.7,
+        "top_p": 0.9
+    })
+
+    # 评估配置
+    metrics: List[str] = field(default_factory=lambda: ["em", "f1", "acc"])
+
+    # 调试配置
+    debug_mode: bool = False
+    save_intermediate_results: bool = True
+    log_level: str = "INFO"
+
+
+@dataclass
+class FlexRAGIntegratedConfig:
+    """深度集成 FlexRAG 的配置类"""
+
+    # 基础配置
+    device: str = "cuda"
+    batch_size: int = 4
+    max_input_length: int = 2048
+
+    # FlexRAG 检索器配置（简化版，主要使用模拟实现）
+    retriever_configs: Dict[str, Any] = field(default_factory=lambda: {
+        "keyword_retriever": {
+            "retriever_type": "mock",
+            "config": {
+                "retriever_path": "./adaptive_rag/data/keyword_index"
+            }
+        },
+        "dense_retriever": {
+            "retriever_type": "mock",
+            "config": {
+                "retriever_path": "./adaptive_rag/data/dense_index"
+            }
+        },
+        "web_retriever": {
+            "retriever_type": "mock",
+            "config": {
+                "search_engine": "google"
+            }
+        }
+    })
+
+    # FlexRAG 重排序器配置（简化版）
+    ranker_configs: Dict[str, Any] = field(default_factory=lambda: {
+        "cross_encoder": {
+            "ranker_type": "mock",
+            "config": {
+                "model_name": "BAAI/bge-reranker-base",
+                "reserve_num": 10
+            }
+        },
+        "colbert": {
+            "ranker_type": "mock",
+            "config": {
+                "model_name": "colbert-ir/colbertv2.0",
+                "reserve_num": 10
+            }
+        }
+    })
+
+    # FlexRAG 生成器配置（简化版）
+    generator_configs: Dict[str, Any] = field(default_factory=lambda: {
+        "main_generator": {
+            "generator_type": "mock",
+            "config": {
+                "model_path": "./adaptive_rag/models/qwen1.5-1.8b",
+                "model_type": "causal_lm"
+            }
+        },
+        "openai_generator": {
+            "generator_type": "mock",
+            "config": {
+                "model_name": "gpt-3.5-turbo",
+                "api_key": "${OPENAI_API_KEY}"
+            }
+        }
+    })
+
+    # FlexRAG 编码器配置
+    encoder_configs: Dict[str, Any] = field(default_factory=lambda: {
+        "dense_encoder": {
+            "encoder_type": "sentence_transformer",
+            "sentence_transformer_config": {
+                "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+                "device": "cuda"
+            }
+        },
+        "openai_encoder": {
+            "encoder_type": "openai",
+            "openai_config": {
+                "model_name": "text-embedding-ada-002",
+                "api_key": "${OPENAI_API_KEY}"
+            }
+        }
     })
     
     # 子模块配置
@@ -268,12 +389,70 @@ log_level: "DEBUG"
 """
 
 
+def create_flexrag_integrated_config() -> FlexRAGIntegratedConfig:
+    """创建 FlexRAG 深度集成配置"""
+    config = FlexRAGIntegratedConfig()
+
+    # 解析检索器配置中的路径
+    for retriever_name, retriever_config in config.retriever_configs.items():
+        if "flex_config" in retriever_config:
+            flex_config = retriever_config["flex_config"]
+            if "retriever_path" in flex_config:
+                flex_config["retriever_path"] = resolve_path(flex_config["retriever_path"])
+
+    # 解析生成器配置中的路径
+    for generator_name, generator_config in config.generator_configs.items():
+        if "hf_config" in generator_config:
+            hf_config = generator_config["hf_config"]
+            if "model_path" in hf_config:
+                hf_config["model_path"] = resolve_path(hf_config["model_path"])
+
+    return config
+
+
+def get_config_for_mode(mode: str = "adaptive"):
+    """根据模式获取配置
+
+    Args:
+        mode: 配置模式
+            - "adaptive": 原始自适应配置
+            - "flexrag": FlexRAG 深度集成配置
+            - "hybrid": 混合配置
+    """
+    if mode == "flexrag":
+        return create_flexrag_integrated_config()
+    elif mode == "hybrid":
+        # 混合配置：结合两种配置的优点
+        base_config = create_default_config()
+        flexrag_config = create_flexrag_integrated_config()
+
+        # 这里可以实现配置合并逻辑
+        return flexrag_config  # 暂时返回 FlexRAG 配置
+    else:
+        return create_default_config()
+
+
 if __name__ == "__main__":
     # 测试配置系统
+    print("🧪 测试配置系统")
+
+    # 测试原始配置
     config = create_default_config()
-    print("默认配置创建成功")
-    
+    print("✅ 默认配置创建成功")
+
+    # 测试 FlexRAG 集成配置
+    if FLEXRAG_AVAILABLE:
+        flexrag_config = create_flexrag_integrated_config()
+        print("✅ FlexRAG 集成配置创建成功")
+    else:
+        print("⚠️ FlexRAG 未安装，跳过集成配置测试")
+
+    # 测试配置模式选择
+    for mode in ["adaptive", "flexrag", "hybrid"]:
+        test_config = get_config_for_mode(mode)
+        print(f"✅ {mode} 模式配置创建成功")
+
     # 保存示例配置
     with open("adaptive_rag_config.yaml", "w") as f:
         f.write(EXAMPLE_CONFIG_YAML)
-    print("示例配置文件已保存")
+    print("✅ 示例配置文件已保存")
