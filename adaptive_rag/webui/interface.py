@@ -27,6 +27,34 @@ from adaptive_rag.config import create_flexrag_integrated_config, FLEXRAG_AVAILA
 from adaptive_rag.core.flexrag_integrated_assistant import FlexRAGIntegratedAssistant
 
 
+class MockDataManager:
+    """模拟数据管理器 - 用于WebUI展示"""
+
+    def __init__(self):
+        self.corpus_stats = {
+            "total_documents": 1000,
+            "total_tokens": 500000,
+            "avg_doc_length": 500,
+            "last_updated": "2024-01-01 12:00:00"
+        }
+
+    def get_corpus_stats(self):
+        """获取语料库统计信息"""
+        return self.corpus_stats
+
+    def search_documents(self, query: str, top_k: int = 5):
+        """模拟文档搜索"""
+        return [
+            {
+                "id": f"doc_{i}",
+                "title": f"Document {i}",
+                "content": f"This is a sample document about {query}...",
+                "score": 0.9 - i * 0.1
+            }
+            for i in range(1, min(top_k + 1, 6))
+        ]
+
+
 class AdaptiveRAGEngine:
     """智能自适应 RAG 引擎 - 借鉴 FlashRAG 的 Engine 设计"""
     
@@ -43,6 +71,9 @@ class AdaptiveRAGEngine:
         self.is_initialized = True
         self.current_query = ""
         self.last_results = None
+
+        # 添加数据管理器（模拟）
+        self.data_manager = MockDataManager()
 
         print(f"✅ AdaptiveRAG 引擎初始化完成")
         print(f"   FlexRAG 可用: {'是' if FLEXRAG_AVAILABLE else '否'}")

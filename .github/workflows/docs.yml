@@ -1,0 +1,190 @@
+name: 📚 Deploy Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - 'CHANGELOG.md'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📝 Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 📦 Install Docsify CLI
+        run: npm install -g docsify-cli
+
+      - name: 🏗️ Prepare documentation
+        run: |
+          # Copy main README to docs if it doesn't exist
+          if [ ! -f docs/README.md ]; then
+            cp README.md docs/
+          fi
+          
+          # Copy other important files to docs
+          cp CONTRIBUTING.md docs/contributing.md
+          cp CHANGELOG.md docs/changelog.md
+          
+          # Create additional documentation files if they don't exist
+          mkdir -p docs/api
+          
+          # Create installation guide
+          if [ ! -f docs/installation.md ]; then
+            cat > docs/installation.md << 'EOF'
+          # 📦 Installation Guide
+          
+          ## Prerequisites
+          
+          - Python 3.8+
+          - PyTorch 1.9+
+          - CUDA (optional, for GPU acceleration)
+          
+          ## Quick Install
+          
+          ```bash
+          pip install adaptiverag
+          ```
+          
+          ## Development Install
+          
+          ```bash
+          git clone https://github.com/Rito-w/adaptiverag.git
+          cd adaptiverag
+          pip install -e ".[dev]"
+          ```
+          
+          ## Verify Installation
+          
+          ```python
+          import adaptive_rag
+          print(adaptive_rag.__version__)
+          ```
+          EOF
+          fi
+          
+          # Create quick start guide
+          if [ ! -f docs/quickstart.md ]; then
+            cat > docs/quickstart.md << 'EOF'
+          # 🚀 Quick Start Guide
+          
+          ## Basic Usage
+          
+          ```python
+          from adaptive_rag import AdaptiveRAG
+          
+          # Initialize
+          rag = AdaptiveRAG()
+          
+          # Ask a question
+          result = rag.answer("What is machine learning?")
+          print(result.answer)
+          ```
+          
+          ## Configuration
+          
+          ```python
+          from adaptive_rag.config import AdaptiveRAGConfig
+          
+          config = AdaptiveRAGConfig(
+              retrieval_topk=10,
+              enable_reranking=True
+          )
+          
+          rag = AdaptiveRAG(config)
+          ```
+          
+          ## Running Experiments
+          
+          ```bash
+          # Quick test
+          python quick_test.py
+          
+          # Full experiments
+          python run_experiments.py full
+          ```
+          EOF
+          fi
+
+      - name: 🔍 List documentation files
+        run: |
+          echo "📁 Documentation structure:"
+          find docs -type f -name "*.md" -o -name "*.html" | sort
+
+      - name: 🏗️ Build with Docsify
+        run: |
+          cd docs
+          # Docsify doesn't need a build step, but we can validate the structure
+          echo "✅ Docsify documentation ready"
+          ls -la
+
+      - name: 📤 Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: 🎉 Deployment Summary
+        run: |
+          echo "## 🎉 Documentation Deployed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📖 **Documentation URL**: ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 What was deployed:" >> $GITHUB_STEP_SUMMARY
+          echo "- 🏠 Main documentation site" >> $GITHUB_STEP_SUMMARY
+          echo "- 📚 API references" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 Quick start guides" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔧 Installation instructions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Quick Links:" >> $GITHUB_STEP_SUMMARY
+          echo "- [📖 Documentation](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [🚀 Quick Start](${{ steps.deployment.outputs.page_url }}#/quickstart)" >> $GITHUB_STEP_SUMMARY
+          echo "- [📦 Installation](${{ steps.deployment.outputs.page_url }}#/installation)" >> $GITHUB_STEP_SUMMARY
