@@ -1,42 +1,42 @@
-# 📊 Diagrams and Visualizations
+# 📊 图表和可视化
 
-This page demonstrates the various diagrams and visualizations used throughout the AdaptiveRAG documentation.
+本页面展示了 AdaptiveRAG 文档中使用的各种图表和可视化内容。
 
-## 🔄 Process Flow Diagrams
+## 🔄 流程图
 
-### Basic Pipeline Flow
+### 基础流水线流程
 
 ```mermaid
 flowchart LR
-    A[Query] --> B[Decompose]
-    B --> C[Plan]
-    C --> D[Retrieve]
-    D --> E[Rerank]
-    E --> F[Generate]
-    F --> G[Response]
+    A[查询] --> B[分解]
+    B --> C[规划]
+    C --> D[检索]
+    D --> E[重排]
+    E --> F[生成]
+    F --> G[响应]
 ```
 
-### Detailed Processing Pipeline
+### 详细处理流水线
 
 ```mermaid
 flowchart TD
-    Start([User Query]) --> Analyze{Query Analysis}
-    Analyze -->|Simple| DirectRetrieval[Direct Retrieval]
-    Analyze -->|Complex| TaskDecomp[Task Decomposition]
-    
-    TaskDecomp --> SubTask1[Subtask 1]
-    TaskDecomp --> SubTask2[Subtask 2]
-    TaskDecomp --> SubTaskN[Subtask N]
-    
-    DirectRetrieval --> Retrieve[Multi-Retrieval]
+    Start([用户查询]) --> Analyze{查询分析}
+    Analyze -->|简单| DirectRetrieval[直接检索]
+    Analyze -->|复杂| TaskDecomp[任务分解]
+
+    TaskDecomp --> SubTask1[子任务 1]
+    TaskDecomp --> SubTask2[子任务 2]
+    TaskDecomp --> SubTaskN[子任务 N]
+
+    DirectRetrieval --> Retrieve[多重检索]
     SubTask1 --> Retrieve
     SubTask2 --> Retrieve
     SubTaskN --> Retrieve
-    
-    Retrieve --> Rerank[Context Reranking]
-    Rerank --> Generate[Adaptive Generation]
-    Generate --> End([Final Response])
-    
+
+    Retrieve --> Rerank[上下文重排]
+    Rerank --> Generate[自适应生成]
+    Generate --> End([最终响应])
+
     style Start fill:#e1f5fe
     style End fill:#e8f5e8
     style Analyze fill:#fff3e0
@@ -44,49 +44,49 @@ flowchart TD
     style Generate fill:#fce4ec
 ```
 
-## 🏗️ Architecture Diagrams
+## 🏗️ 架构图
 
-### Component Architecture
+### 组件架构
 
 ```mermaid
 graph TB
-    subgraph "User Interface"
+    subgraph "用户界面"
         UI[Web UI]
         API[REST API]
-        CLI[Command Line]
+        CLI[命令行]
     end
-    
-    subgraph "Core Engine"
-        Engine[AdaptiveRAG Engine]
-        Config[Configuration Manager]
-        Cache[Cache Manager]
+
+    subgraph "核心引擎"
+        Engine[AdaptiveRAG 引擎]
+        Config[配置管理器]
+        Cache[缓存管理器]
     end
-    
-    subgraph "Processing Components"
-        TD[Task Decomposer]
-        RP[Retrieval Planner]
-        MR[Multi-Retriever]
-        CR[Context Reranker]
-        AG[Adaptive Generator]
+
+    subgraph "处理组件"
+        TD[任务分解器]
+        RP[检索规划器]
+        MR[多重检索器]
+        CR[上下文重排器]
+        AG[自适应生成器]
     end
-    
-    subgraph "External Integrations"
-        FlexRAG[FlexRAG Components]
-        FlashRAG[FlashRAG Datasets]
-        LLM[Language Models]
-        Search[Search APIs]
+
+    subgraph "外部集成"
+        FlexRAG[FlexRAG 组件]
+        FlashRAG[FlashRAG 数据集]
+        LLM[语言模型]
+        Search[搜索 API]
     end
-    
-    subgraph "Storage"
-        DB[(Vector Database)]
-        FS[(File System)]
-        Logs[(Logs)]
+
+    subgraph "存储"
+        DB[(向量数据库)]
+        FS[(文件系统)]
+        Logs[(日志)]
     end
-    
+
     UI --> Engine
     API --> Engine
     CLI --> Engine
-    
+
     Engine --> Config
     Engine --> Cache
     Engine --> TD
@@ -94,7 +94,7 @@ graph TB
     Engine --> MR
     Engine --> CR
     Engine --> AG
-    
+
     TD --> LLM
     RP --> Config
     MR --> FlexRAG
@@ -102,16 +102,16 @@ graph TB
     MR --> DB
     CR --> FlexRAG
     AG --> LLM
-    
+
     Cache --> FS
     Engine --> Logs
-    
+
     classDef ui fill:#e3f2fd
     classDef core fill:#fff3e0
     classDef processing fill:#e8f5e8
     classDef external fill:#fce4ec
     classDef storage fill:#f3e5f5
-    
+
     class UI,API,CLI ui
     class Engine,Config,Cache core
     class TD,RP,MR,CR,AG processing
@@ -119,33 +119,33 @@ graph TB
     class DB,FS,Logs storage
 ```
 
-## 📈 Experimental Flow
+## 📈 实验流程
 
-### Evaluation Pipeline
+### 评估流水线
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant Runner as Benchmark Runner
-    participant Loader as Dataset Loader
-    participant Method as RAG Method
-    participant Evaluator as Metrics Evaluator
-    participant Analyzer as Result Analyzer
-    
-    User->>Runner: Start Experiment
-    Runner->>Loader: Load Dataset
-    Loader-->>Runner: Dataset Ready
-    
-    loop For each sample
-        Runner->>Method: Process Query
-        Method-->>Runner: Generated Response
-        Runner->>Evaluator: Calculate Metrics
-        Evaluator-->>Runner: Metric Scores
+    participant User as 用户
+    participant Runner as 基准测试运行器
+    participant Loader as 数据集加载器
+    participant Method as RAG 方法
+    participant Evaluator as 指标评估器
+    participant Analyzer as 结果分析器
+
+    User->>Runner: 开始实验
+    Runner->>Loader: 加载数据集
+    Loader-->>Runner: 数据集就绪
+
+    loop 对每个样本
+        Runner->>Method: 处理查询
+        Method-->>Runner: 生成响应
+        Runner->>Evaluator: 计算指标
+        Evaluator-->>Runner: 指标分数
     end
-    
-    Runner->>Analyzer: Aggregate Results
-    Analyzer-->>Runner: Analysis Report
-    Runner-->>User: Experiment Complete
+
+    Runner->>Analyzer: 聚合结果
+    Analyzer-->>Runner: 分析报告
+    Runner-->>User: 实验完成
 ```
 
 ### Ablation Study Flow

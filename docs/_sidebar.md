@@ -23,6 +23,7 @@
 
 * **实验**
   * [🧪 实验框架](experiments.md)
+  * [🎯 实验设计方案](experimental-design.md)
   * [📈 基准测试](benchmarks.md)
   * [🔬 消融研究](ablation-studies.md)
   * [📊 结果分析](results-analysis.md)
