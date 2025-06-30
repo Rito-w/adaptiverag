@@ -22,6 +22,7 @@
   * [📊 LevelRAG 方法论](levelrag-methodology.md)
 
 * **实验**
+  * [📋 实验计划](experiment-plan.md)
   * [🧪 实验框架](experiments.md)
   * [📈 基准测试](benchmarks.md)
   * [🔬 消融研究](ablation-studies.md)
