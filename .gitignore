@@ -138,15 +138,45 @@ dmypy.json
 .DS_Store
 Thumbs.db
 
-# Project specific
-*.log
-data/
+# AdaptiveRAG specific
+# Data directories
+data/raw/
+data/processed/
+data/cache/
+data/downloads/
+test_data/
+
+# Experiment results
+experiments/*/
+!experiments/.gitkeep
+results/
+outputs/
+mini_test/
+quick_test/
+
+# Model files
 models/
 checkpoints/
-outputs/
-temp/
-tmp/
+*.pt
+*.pth
+*.bin
+*.safetensors
 
-# Test files (optional - you might want to keep some)
-test_*.py
-demo_*.py
+# Logs
+logs/
+*.log
+wandb/
+
+# Configuration files with secrets
+config/secrets.yaml
+config/api_keys.yaml
+.env.local
+
+# Cache directories
+.cache/
+cache/
+
+# Temporary test files
+test_framework.py
+quick_test.py
+test_config.yaml

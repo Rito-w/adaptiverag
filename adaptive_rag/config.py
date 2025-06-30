@@ -7,6 +7,8 @@
 
 import os
 import yaml
+import random
+import datetime
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 
@@ -346,23 +348,147 @@ def load_config(config_file: Optional[str] = None, config_dict: Optional[Dict] =
     return manager.get_config()
 
 
-# 示例配置文件内容
+# ===== 实验配置系统 (借鉴 FlashRAG) =====
+
+@dataclass
+class ExperimentConfig:
+    """实验配置 - 借鉴 FlashRAG 的实验设计"""
+
+    # 环境设置
+    data_dir: str = "./data/benchmarks"
+    save_dir: str = "./experiments"
+    gpu_id: str = "0"
+    seed: int = 2024
+
+    # 数据集设置
+    dataset_name: str = "natural_questions"
+    split: List[str] = field(default_factory=lambda: ["test"])
+    test_sample_num: Optional[int] = None  # None 表示使用全部数据
+    random_sample: bool = False
+
+    # 保存设置
+    save_intermediate_data: bool = True
+    save_predictions: bool = True
+    save_note: str = "adaptive_rag_experiment"
+
+    # 评估设置
+    metrics: List[str] = field(default_factory=lambda: [
+        "exact_match", "f1_score", "rouge_l", "bert_score"
+    ])
+    compute_bert_score: bool = True
+
+    # 方法设置
+    method_name: str = "adaptive_rag"
+    baseline_methods: List[str] = field(default_factory=lambda: [
+        "naive_rag", "self_rag"
+    ])
+
+
+@dataclass
+class DatasetConfig:
+    """数据集配置 - 兼容 FlashRAG 数据格式"""
+
+    # 支持的数据集映射 (FlashRAG 格式)
+    DATASET_MAPPING = {
+        # 单跳问答
+        "natural_questions": "nq",
+        "trivia_qa": "trivia",
+        "ms_marco": "msmarco",
+
+        # 多跳推理
+        "hotpot_qa": "hotpot",
+        "2wiki_multihop": "2wiki",
+        "musique": "musique",
+
+        # 对话问答
+        "quac": "quac",
+        "coqa": "coqa",
+
+        # 开放域问答
+        "web_questions": "webq",
+        "entity_questions": "entityq"
+    }
+
+    # 数据集路径配置
+    dataset_path: str = "./data/benchmarks"
+    corpus_path: str = "./data/corpus/wiki_2021.jsonl"
+    index_path: str = "./data/indexes"
+
+    # 数据处理配置
+    max_context_length: int = 512
+    max_question_length: int = 256
+    max_answer_length: int = 128
+
+
+# 示例配置文件内容 (借鉴 FlashRAG 格式)
 EXAMPLE_CONFIG_YAML = """
-# 智能自适应 RAG 配置示例
+# ===== AdaptiveRAG 实验配置 (借鉴 FlashRAG) =====
 
-# 基础配置
-device: "cuda"
-batch_size: 4
-max_input_length: 2048
+# ------------------------------------------------环境设置------------------------------------------------#
+# 数据和输出目录路径
+data_dir: "data/benchmarks/"
+save_dir: "experiments/"
 
-# 模型路径
-model_paths:
-  dense_retriever: "/root/autodl-tmp/models/e5-base-v2"
-  generator: "/root/autodl-tmp/models/qwen1.5-1.8b"
-  reranker: "/root/autodl-tmp/models/bge-reranker-v2-m3"
+gpu_id: "0"
+dataset_name: "natural_questions"  # data_dir 中的数据集名称
+split: ["test"]  # 要加载的数据集分割 (例如 train,dev,test)
 
-# 检索策略配置
-retrieval_plan_config:
+# 测试采样配置
+test_sample_num: ~  # 测试样本数量 (仅在 dev/test 分割中有效), 如果为 None, 测试所有样本
+random_sample: false  # 是否随机采样测试样本
+
+# 可重现性种子
+seed: 2024
+
+# 是否保存中间数据
+save_intermediate_data: true
+save_predictions: true
+save_note: "adaptive_rag_experiment"
+
+# ------------------------------------------------检索设置------------------------------------------------#
+# 检索方法配置
+retrieval_method: "adaptive"  # 检索方法名称或路径
+retrieval_model_path: ~  # 检索模型路径
+index_path: ~  # 如果未提供则自动设置
+corpus_path: ~  # 语料库路径，'.jsonl' 格式存储文档
+
+# 检索参数
+retrieval_topk: 20  # 检索的文档数量
+final_context_count: 5  # 最终使用的上下文数量
+
+# ------------------------------------------------生成设置------------------------------------------------#
+# 生成器配置
+generator_model: "qwen1.5-1.8b"  # 生成器模型名称
+generator_model_path: ~  # 生成器模型路径
+framework: "hf"  # 使用的框架 (hf/vllm)
+
+# 生成参数
+generation_params:
+  max_tokens: 256
+  temperature: 0.1
+  top_p: 0.9
+  do_sample: false
+
+# ------------------------------------------------评估设置------------------------------------------------#
+# 评估指标
+metrics: ["exact_match", "f1_score", "rouge_l", "bert_score"]
+compute_bert_score: true
+
+# ------------------------------------------------AdaptiveRAG 特定设置------------------------------------------------#
+# 自适应检索策略
+adaptive_retrieval:
+  enable_task_decomposition: true
+  enable_strategy_planning: true
+  enable_multi_retriever: true
+  enable_reranking: true
+
+# 任务分解配置
+task_decomposition:
+  max_subtasks: 5
+  decomposition_threshold: 0.7
+
+# 策略规划配置
+strategy_planning:
   task_specific_weights:
     factual:
       keyword: 0.7
@@ -372,21 +498,277 @@ retrieval_plan_config:
       keyword: 0.2
       dense: 0.7
       web: 0.1
+    multi_hop:
+      keyword: 0.3
+      dense: 0.5
+      web: 0.2
 
-# 相关度评分配置
-relevance_score_config:
-  score_weights:
-    semantic: 0.3
-    factual: 0.3
-    temporal: 0.1
-    entity: 0.2
-    diversity: 0.1
+# 重排序配置
+reranking:
+  reranker_model: "bge-reranker-base"
+  reranker_model_path: ~
+  rerank_topk: 10
 
 # 调试配置
-debug_mode: true
-save_intermediate_results: true
-log_level: "DEBUG"
+debug_mode: false
+log_level: "INFO"
 """
+
+
+# ===== 配置加载器 (借鉴 FlashRAG Config 类) =====
+
+class AdaptiveRAGConfig:
+    """AdaptiveRAG 配置加载器 - 借鉴 FlashRAG 的 Config 类设计"""
+
+    def __init__(self, config_file_path=None, config_dict=None):
+        """
+        初始化配置
+
+        Args:
+            config_file_path: YAML 配置文件路径
+            config_dict: 配置字典 (优先级高于文件)
+        """
+        if config_dict is None:
+            config_dict = {}
+
+        # 加载配置
+        self.file_config = self._load_file_config(config_file_path)
+        self.variable_config = config_dict
+        self.external_config = self._merge_external_config()
+        self.internal_config = self._get_internal_config()
+        self.final_config = self._get_final_config()
+
+        # 验证和设置
+        self._check_final_config()
+        self._set_additional_keys()
+        self._init_device()
+        self._set_seed()
+        self._prepare_directories()
+
+    def _load_file_config(self, config_file_path):
+        """加载 YAML 配置文件"""
+        if config_file_path is None:
+            return {}
+
+        if not os.path.exists(config_file_path):
+            print(f"⚠️ 配置文件不存在: {config_file_path}")
+            return {}
+
+        with open(config_file_path, 'r', encoding='utf-8') as f:
+            try:
+                config = yaml.safe_load(f)
+                return config if config is not None else {}
+            except yaml.YAMLError as e:
+                print(f"❌ YAML 配置文件解析错误: {e}")
+                return {}
+
+    def _merge_external_config(self):
+        """合并外部配置"""
+        external_config = {}
+        external_config.update(self.file_config)
+        external_config.update(self.variable_config)  # 变量配置优先级更高
+        return external_config
+
+    def _get_internal_config(self):
+        """获取内部默认配置"""
+        return {
+            # 基础设置
+            "device": "cuda",
+            "seed": 2024,
+            "batch_size": 4,
+
+            # 路径设置
+            "data_dir": "./data/benchmarks",
+            "save_dir": "./experiments",
+            "corpus_path": "./data/corpus/wiki_2021.jsonl",
+            "index_path": "./data/indexes",
+
+            # 数据集设置
+            "dataset_name": "natural_questions",
+            "split": ["test"],
+            "test_sample_num": None,
+            "random_sample": False,
+
+            # 检索设置
+            "retrieval_method": "adaptive",
+            "retrieval_topk": 20,
+            "final_context_count": 5,
+
+            # 生成设置
+            "generator_model": "qwen1.5-1.8b",
+            "framework": "hf",
+            "generation_params": {
+                "max_tokens": 256,
+                "temperature": 0.1,
+                "top_p": 0.9,
+                "do_sample": False
+            },
+
+            # 评估设置
+            "metrics": ["exact_match", "f1_score", "rouge_l"],
+            "compute_bert_score": True,
+
+            # 保存设置
+            "save_intermediate_data": True,
+            "save_predictions": True,
+            "save_note": "adaptive_rag_experiment",
+
+            # AdaptiveRAG 特定设置
+            "adaptive_retrieval": {
+                "enable_task_decomposition": True,
+                "enable_strategy_planning": True,
+                "enable_multi_retriever": True,
+                "enable_reranking": True
+            },
+
+            # 调试设置
+            "debug_mode": False,
+            "log_level": "INFO"
+        }
+
+    def _get_final_config(self):
+        """获取最终配置"""
+        final_config = {}
+        final_config.update(self.internal_config)
+        final_config.update(self.external_config)
+        return final_config
+
+    def _check_final_config(self):
+        """检查和修正最终配置"""
+        # 检查 split 配置
+        split = self.final_config.get("split")
+        if split is None:
+            split = ["test"]
+        if isinstance(split, str):
+            split = [split]
+        self.final_config["split"] = split
+
+        # 检查路径配置
+        data_dir = self.final_config.get("data_dir", "./data/benchmarks")
+        save_dir = self.final_config.get("save_dir", "./experiments")
+
+        # 设置数据集路径
+        dataset_name = self.final_config.get("dataset_name", "natural_questions")
+        dataset_path = os.path.join(data_dir, dataset_name)
+        self.final_config["dataset_path"] = dataset_path
+
+        # 设置保存路径
+        save_note = self.final_config.get("save_note", "experiment")
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        save_path = os.path.join(save_dir, f"{save_note}_{timestamp}")
+        self.final_config["save_path"] = save_path
+
+    def _set_additional_keys(self):
+        """设置额外的键值"""
+        # 设置时间戳
+        self.final_config["timestamp"] = datetime.datetime.now().isoformat()
+
+        # 设置实验 ID
+        import uuid
+        self.final_config["experiment_id"] = str(uuid.uuid4())[:8]
+
+    def _init_device(self):
+        """初始化设备"""
+        import torch
+
+        device = self.final_config.get("device", "cuda")
+        if device == "cuda" and not torch.cuda.is_available():
+            print("⚠️ CUDA 不可用，切换到 CPU")
+            device = "cpu"
+
+        self.final_config["device"] = device
+
+        # 设置 GPU ID
+        gpu_id = self.final_config.get("gpu_id", "0")
+        if device == "cuda":
+            os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
+
+    def _set_seed(self):
+        """设置随机种子"""
+        seed = self.final_config.get("seed", 2024)
+
+        import random
+        import numpy as np
+        import torch
+
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+
+    def _prepare_directories(self):
+        """准备目录"""
+        # 创建保存目录
+        save_path = self.final_config.get("save_path")
+        if save_path:
+            os.makedirs(save_path, exist_ok=True)
+
+        # 创建数据目录
+        data_dir = self.final_config.get("data_dir")
+        if data_dir:
+            os.makedirs(data_dir, exist_ok=True)
+
+    def __getitem__(self, key):
+        """字典式访问"""
+        return self.final_config[key]
+
+    def __setitem__(self, key, value):
+        """字典式设置"""
+        self.final_config[key] = value
+
+    def get(self, key, default=None):
+        """获取配置值"""
+        return self.final_config.get(key, default)
+
+    def update(self, config_dict):
+        """更新配置"""
+        self.final_config.update(config_dict)
+
+    def save_config(self, save_path=None):
+        """保存配置到文件"""
+        if save_path is None:
+            save_path = os.path.join(self.final_config["save_path"], "config.yaml")
+
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        with open(save_path, 'w', encoding='utf-8') as f:
+            yaml.dump(self.final_config, f, default_flow_style=False, allow_unicode=True)
+
+        print(f"✅ 配置已保存到: {save_path}")
+
+
+# ===== 便捷函数 =====
+
+def create_experiment_config(config_file=None, **kwargs):
+    """创建实验配置"""
+    return AdaptiveRAGConfig(config_file_path=config_file, config_dict=kwargs)
+
+
+def save_example_config(save_path="./adaptive_rag_config.yaml"):
+    """保存示例配置文件"""
+    with open(save_path, 'w', encoding='utf-8') as f:
+        f.write(EXAMPLE_CONFIG_YAML)
+    print(f"✅ 示例配置文件已保存到: {save_path}")
+
+
+if __name__ == "__main__":
+    # 测试配置系统
+    print("🧪 测试 AdaptiveRAG 配置系统")
+
+    # 创建配置
+    config = create_experiment_config(
+        dataset_name="natural_questions",
+        test_sample_num=10,
+        debug_mode=True
+    )
+
+    print(f"数据集: {config['dataset_name']}")
+    print(f"设备: {config['device']}")
+    print(f"保存路径: {config['save_path']}")
+
+    # 保存示例配置
+    save_example_config()
 
 
 def create_flexrag_integrated_config() -> FlexRAGIntegratedConfig:
