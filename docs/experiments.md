@@ -1,35 +1,35 @@
-# 🧪 Experimental Framework
+# 🧪 实验框架
 
-AdaptiveRAG includes a comprehensive experimental framework inspired by FlashRAG, designed for rigorous academic evaluation and comparison with state-of-the-art methods.
+AdaptiveRAG 包含一个受 FlashRAG 启发的综合实验框架，专为严格的学术评估和与最先进方法的比较而设计。
 
-## 🎯 Framework Overview
+## 🎯 框架概览
 
-Our experimental framework provides:
+我们的实验框架提供：
 
-- **Standardized Evaluation**: Compatible with FlashRAG datasets and metrics
-- **Baseline Comparisons**: Implementation of major RAG methods
-- **Ablation Studies**: Detailed component contribution analysis
-- **Reproducible Results**: Configurable experiments for academic research
+- **标准化评估**: 兼容 FlashRAG 数据集和指标
+- **基线比较**: 主要 RAG 方法的实现
+- **消融研究**: 详细的组件贡献分析
+- **可重现结果**: 可配置的学术研究实验
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-### Running Your First Experiment
+### 运行您的第一个实验
 
 ```bash
-# Quick test with sample data
+# 使用样本数据快速测试
 python quick_test.py
 
-# Run a simple experiment
+# 运行简单实验
 python run_experiments.py quick --sample-data
 
-# Full evaluation on standard datasets
+# 在标准数据集上进行完整评估
 python run_experiments.py full
 
-# Ablation study
+# 消融研究
 python run_experiments.py ablation
 ```
 
-### Basic Configuration
+### 基本配置
 
 ```python
 from adaptive_rag.evaluation import BenchmarkRunner, BenchmarkConfig
@@ -47,7 +47,7 @@ runner = BenchmarkRunner(config)
 runner.run_benchmark()
 ```
 
-## 📊 Supported Datasets
+## 📊 支持的数据集
 
 ### Single-hop QA
 - **Natural Questions**: Real questions from Google search

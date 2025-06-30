@@ -1,45 +1,45 @@
-# Contributing to AdaptiveRAG
+# AdaptiveRAG 贡献指南
 
-We welcome contributions to AdaptiveRAG! This document provides guidelines for contributing to the project.
+我们欢迎对 AdaptiveRAG 的贡献！本文档提供了为项目贡献的指导原则。
 
-## 🚀 Getting Started
+## 🚀 开始
 
-### Development Setup
+### 开发环境设置
 
-1. **Fork the repository**
+1. **Fork 仓库**
    ```bash
    git clone https://github.com/your-username/adaptiverag.git
    cd adaptiverag
    ```
 
-2. **Create a virtual environment**
+2. **创建虚拟环境**
    ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   source venv/bin/activate  # Windows 系统: venv\Scripts\activate
    ```
 
-3. **Install development dependencies**
+3. **安装开发依赖**
    ```bash
    pip install -e ".[dev]"
    ```
 
-4. **Install pre-commit hooks**
+4. **安装 pre-commit 钩子**
    ```bash
    pre-commit install
    ```
 
-## 📝 Development Guidelines
+## 📝 开发指南
 
-### Code Style
+### 代码风格
 
-We use the following tools to maintain code quality:
+我们使用以下工具来维护代码质量：
 
-- **Black**: Code formatting
-- **isort**: Import sorting
-- **flake8**: Linting
-- **mypy**: Type checking
+- **Black**: 代码格式化
+- **isort**: 导入排序
+- **flake8**: 代码检查
+- **mypy**: 类型检查
 
-Run all checks:
+运行所有检查：
 ```bash
 black .
 isort .
@@ -47,142 +47,142 @@ flake8 .
 mypy adaptive_rag/
 ```
 
-### Testing
+### 测试
 
-Run tests before submitting:
+提交前运行测试：
 ```bash
 pytest tests/
 python quick_test.py
 ```
 
-### Documentation
+### 文档
 
-- Update docstrings for new functions/classes
-- Add type hints to all functions
-- Update README.md if adding new features
+- 为新函数/类更新文档字符串
+- 为所有函数添加类型提示
+- 如果添加新功能，请更新 README.md
 
-## 🔄 Contribution Process
+## 🔄 贡献流程
 
-### 1. Create an Issue
+### 1. 创建 Issue
 
-Before starting work, create an issue describing:
-- The problem you're solving
-- Your proposed solution
-- Any breaking changes
+开始工作前，创建一个 issue 描述：
+- 您要解决的问题
+- 您提出的解决方案
+- 任何破坏性更改
 
-### 2. Create a Branch
+### 2. 创建分支
 
 ```bash
 git checkout -b feature/your-feature-name
-# or
+# 或者
 git checkout -b fix/your-bug-fix
 ```
 
-### 3. Make Changes
+### 3. 进行更改
 
-- Write clean, documented code
-- Add tests for new functionality
-- Ensure all tests pass
-- Follow the existing code style
+- 编写清晰、有文档的代码
+- 为新功能添加测试
+- 确保所有测试通过
+- 遵循现有代码风格
 
-### 4. Commit Changes
+### 4. 提交更改
 
-Use conventional commit messages:
+使用约定式提交消息：
 ```bash
 git commit -m "feat: add new retrieval method"
 git commit -m "fix: resolve memory leak in cache"
 git commit -m "docs: update API documentation"
 ```
 
-### 5. Submit Pull Request
+### 5. 提交 Pull Request
 
-- Fill out the PR template
-- Link to related issues
-- Ensure CI passes
-- Request review from maintainers
+- 填写 PR 模板
+- 链接到相关 issues
+- 确保 CI 通过
+- 请求维护者审查
 
-## 🧪 Types of Contributions
+## 🧪 贡献类型
 
-### Bug Fixes
-- Fix existing functionality
-- Add regression tests
-- Update documentation if needed
+### Bug 修复
+- 修复现有功能
+- 添加回归测试
+- 如需要，更新文档
 
-### New Features
-- Implement new retrieval methods
-- Add evaluation metrics
-- Extend configuration options
+### 新功能
+- 实现新的检索方法
+- 添加评估指标
+- 扩展配置选项
 
-### Documentation
-- Improve README
-- Add tutorials
-- Fix typos and clarifications
+### 文档
+- 改进 README
+- 添加教程
+- 修复错别字和澄清说明
 
-### Performance Improvements
-- Optimize existing code
-- Add benchmarks
-- Profile memory usage
+### 性能改进
+- 优化现有代码
+- 添加基准测试
+- 分析内存使用
 
-## 📋 Pull Request Checklist
+## 📋 Pull Request 检查清单
 
-- [ ] Code follows project style guidelines
-- [ ] Tests pass locally
-- [ ] New tests added for new functionality
-- [ ] Documentation updated
-- [ ] CHANGELOG.md updated (if applicable)
-- [ ] No breaking changes (or clearly documented)
+- [ ] 代码遵循项目风格指南
+- [ ] 测试在本地通过
+- [ ] 为新功能添加了新测试
+- [ ] 文档已更新
+- [ ] CHANGELOG.md 已更新（如适用）
+- [ ] 无破坏性更改（或已清楚记录）
 
-## 🐛 Reporting Bugs
+## 🐛 报告 Bug
 
-When reporting bugs, include:
+报告 bug 时，请包含：
 
-1. **Environment details**
-   - Python version
-   - Operating system
-   - Package versions
+1. **环境详情**
+   - Python 版本
+   - 操作系统
+   - 包版本
 
-2. **Steps to reproduce**
-   - Minimal code example
-   - Expected vs actual behavior
-   - Error messages/stack traces
+2. **重现步骤**
+   - 最小代码示例
+   - 预期与实际行为
+   - 错误消息/堆栈跟踪
 
-3. **Additional context**
-   - Screenshots (if applicable)
-   - Related issues
+3. **附加上下文**
+   - 截图（如适用）
+   - 相关 issues
 
-## 💡 Feature Requests
+## 💡 功能请求
 
-For feature requests, provide:
+对于功能请求，请提供：
 
-1. **Use case description**
-   - What problem does it solve?
-   - Who would benefit?
+1. **用例描述**
+   - 它解决什么问题？
+   - 谁会受益？
 
-2. **Proposed solution**
-   - How should it work?
-   - API design ideas
+2. **建议解决方案**
+   - 它应该如何工作？
+   - API 设计想法
 
-3. **Alternatives considered**
-   - Other approaches
-   - Why this approach is better
+3. **考虑的替代方案**
+   - 其他方法
+   - 为什么这种方法更好
 
-## 📞 Getting Help
+## 📞 获取帮助
 
-- **GitHub Issues**: For bugs and feature requests
-- **Discussions**: For questions and general discussion
-- **Email**: For private inquiries
+- **GitHub Issues**: 用于 bug 和功能请求
+- **Discussions**: 用于问题和一般讨论
+- **Email**: 用于私人咨询
 
-## 🏆 Recognition
+## 🏆 认可
 
-Contributors will be:
-- Listed in CONTRIBUTORS.md
-- Mentioned in release notes
-- Credited in academic papers (if applicable)
+贡献者将：
+- 列在 CONTRIBUTORS.md 中
+- 在发布说明中提及
+- 在学术论文中获得认可（如适用）
 
-## 📄 License
+## 📄 许可证
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+通过贡献，您同意您的贡献将在 MIT 许可证下授权。
 
 ---
 
-Thank you for contributing to AdaptiveRAG! 🎉
+感谢您对 AdaptiveRAG 的贡献！🎉

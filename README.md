@@ -1,71 +1,71 @@
-# 🧠 AdaptiveRAG: Intelligent Adaptive Retrieval-Augmented Generation
+# 🧠 AdaptiveRAG: 智能自适应检索增强生成系统
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-AdaptiveRAG is an intelligent retrieval-augmented generation system that dynamically adapts its retrieval strategy based on query complexity and context requirements. It integrates multiple retrieval methods and uses LLM-driven analysis for optimal performance.
+AdaptiveRAG 是一个智能的检索增强生成系统，能够根据查询复杂度和上下文需求动态调整检索策略。它集成了多种检索方法，并使用大语言模型驱动的分析来实现最佳性能。
 
-## 🌟 Key Features
+## 🌟 核心特性
 
-- **🧠 Intelligent Query Analysis**: LLM-driven query understanding and task decomposition
-- **🔄 Adaptive Retrieval Strategy**: Dynamic selection of optimal retrieval methods
-- **🔗 Multi-Retriever Fusion**: Seamless integration of keyword, dense, and web retrieval
-- **📊 Comprehensive Evaluation**: Extensive benchmarking against state-of-the-art methods
-- **🔧 FlexRAG Integration**: Deep integration with FlexRAG components for stability
-- **📈 Experimental Framework**: Complete evaluation pipeline for academic research
+- **🧠 智能查询分析**: 基于大语言模型的查询理解和任务分解
+- **🔄 自适应检索策略**: 动态选择最优检索方法
+- **🔗 多检索器融合**: 无缝集成关键词、密集向量和网络检索
+- **📊 全面评估**: 与最先进方法的广泛基准测试
+- **🔧 FlexRAG 集成**: 与 FlexRAG 组件深度集成，确保稳定性
+- **📈 实验框架**: 完整的学术研究评估流水线
 
-## 🏗️ Architecture
+## 🏗️ 系统架构
 
 ```
-AdaptiveRAG Pipeline:
-Query → Task Decomposition → Strategy Planning → Multi-Retrieval → Reranking → Generation
+AdaptiveRAG 流水线:
+查询 → 任务分解 → 策略规划 → 多重检索 → 重排序 → 生成
 ```
 
-### Core Components
+### 核心组件
 
-1. **Task Decomposer**: Breaks down complex queries into manageable subtasks
-2. **Retrieval Planner**: Selects optimal retrieval strategies based on query type
-3. **Multi-Retriever**: Fuses results from multiple retrieval methods
-4. **Context Reranker**: Optimizes retrieved context for generation
-5. **Adaptive Generator**: Produces high-quality responses
+1. **任务分解器**: 将复杂查询分解为可管理的子任务
+2. **检索规划器**: 根据查询类型选择最优检索策略
+3. **多重检索器**: 融合多种检索方法的结果
+4. **上下文重排器**: 优化检索到的上下文用于生成
+5. **自适应生成器**: 产生高质量的响应
 
-## 📦 Installation
+## 📦 安装
 
-### Prerequisites
+### 前置要求
 - Python 3.8+
 - PyTorch 1.9+
-- CUDA (optional, for GPU acceleration)
+- CUDA (可选，用于GPU加速)
 
-### Quick Install
+### 快速安装
 ```bash
 git clone https://github.com/your-username/adaptiverag.git
 cd adaptiverag
 pip install -r requirements.txt
 ```
 
-### Development Install
+### 开发安装
 ```bash
 git clone https://github.com/your-username/adaptiverag.git
 cd adaptiverag
 pip install -e .
 ```
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-### Basic Usage
+### 基本用法
 ```python
 from adaptive_rag import AdaptiveRAG
 
-# Initialize AdaptiveRAG
+# 初始化 AdaptiveRAG
 rag = AdaptiveRAG()
 
-# Process a query
-result = rag.answer("What are the latest developments in quantum computing?")
+# 处理查询
+result = rag.answer("量子计算的最新发展是什么？")
 print(result.answer)
 ```
 
-### Configuration
+### 配置
 ```python
 from adaptive_rag.config import AdaptiveRAGConfig
 
@@ -79,68 +79,68 @@ config = AdaptiveRAGConfig(
 rag = AdaptiveRAG(config)
 ```
 
-## 🧪 Experiments
+## 🧪 实验
 
-### Quick Test
+### 快速测试
 ```bash
 python quick_test.py
 ```
 
-### Run Experiments
+### 运行实验
 ```bash
-# Quick experiment with sample data
+# 使用样本数据的快速实验
 python run_experiments.py quick --sample-data
 
-# Full evaluation
+# 完整评估
 python run_experiments.py full
 
-# Ablation study
+# 消融研究
 python run_experiments.py ablation
 
-# Efficiency analysis
+# 效率分析
 python run_experiments.py efficiency
 ```
 
-### Generate Paper Results
+### 生成论文结果
 ```bash
 python run_experiments.py paper
 ```
 
-## 📊 Benchmarks
+## 📊 基准测试
 
-AdaptiveRAG has been evaluated on multiple datasets:
+AdaptiveRAG 已在多个数据集上进行评估：
 
-| Dataset | EM | F1 | ROUGE-L | BERTScore |
+| 数据集 | EM | F1 | ROUGE-L | BERTScore |
 |---------|----|----|---------|-----------|
 | Natural Questions | - | - | - | - |
 | HotpotQA | - | - | - | - |
 | TriviaQA | - | - | - | - |
 | MS MARCO | - | - | - | - |
 
-*Results will be updated after running full experiments*
+*结果将在运行完整实验后更新*
 
-## 📁 Project Structure
+## 📁 项目结构
 
 ```
 adaptiverag/
-├── adaptive_rag/              # Core AdaptiveRAG implementation
-│   ├── core/                  # Core components
-│   ├── modules/               # Individual modules
-│   ├── pipeline/              # Pipeline implementations
-│   ├── evaluation/            # Evaluation framework
-│   ├── config/                # Configuration files
-│   └── utils/                 # Utility functions
-├── experiments/               # Experiment results
-├── data/                      # Dataset storage
-├── docs/                      # Documentation
-├── tests/                     # Unit tests
-├── scripts/                   # Utility scripts
-└── requirements.txt           # Dependencies
+├── adaptive_rag/              # AdaptiveRAG 核心实现
+│   ├── core/                  # 核心组件
+│   ├── modules/               # 独立模块
+│   ├── pipeline/              # 流水线实现
+│   ├── evaluation/            # 评估框架
+│   ├── config/                # 配置文件
+│   └── utils/                 # 工具函数
+├── experiments/               # 实验结果
+├── data/                      # 数据集存储
+├── docs/                      # 文档
+├── tests/                     # 单元测试
+├── scripts/                   # 工具脚本
+└── requirements.txt           # 依赖项
 ```
 
-## 🔧 Configuration
+## 🔧 配置
 
-AdaptiveRAG supports flexible configuration through YAML files and Python dictionaries:
+AdaptiveRAG 支持通过 YAML 文件和 Python 字典进行灵活配置：
 
 ```yaml
 # config.yaml
@@ -153,19 +153,19 @@ adaptive_retrieval:
   enable_reranking: true
 ```
 
-## 📚 Documentation
+## 📚 文档
 
-- [Installation Guide](docs/installation.md)
-- [Configuration Reference](docs/configuration.md)
-- [API Documentation](docs/api.md)
-- [Experiment Guide](docs/experiments.md)
-- [FlexRAG Integration](adaptive_rag/FLEXRAG_INTEGRATION.md)
+- [安装指南](docs/installation.md)
+- [配置参考](docs/configuration.md)
+- [API 文档](docs/api.md)
+- [实验指南](docs/experiments.md)
+- [FlexRAG 集成](adaptive_rag/FLEXRAG_INTEGRATION.md)
 
-## 🤝 Contributing
+## 🤝 贡献
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+我们欢迎贡献！请查看我们的[贡献指南](CONTRIBUTING.md)了解详情。
 
-### Development Setup
+### 开发环境设置
 ```bash
 git clone https://github.com/your-username/adaptiverag.git
 cd adaptiverag
@@ -173,13 +173,13 @@ pip install -e ".[dev]"
 pre-commit install
 ```
 
-## 📄 License
+## 📄 许可证
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+本项目采用 MIT 许可证 - 详情请查看 [LICENSE](LICENSE) 文件。
 
-## 📖 Citation
+## 📖 引用
 
-If you use AdaptiveRAG in your research, please cite:
+如果您在研究中使用 AdaptiveRAG，请引用：
 
 ```bibtex
 @article{adaptiverag2024,
@@ -190,18 +190,18 @@ If you use AdaptiveRAG in your research, please cite:
 }
 ```
 
-## 🙏 Acknowledgments
+## 🙏 致谢
 
-- [FlashRAG](https://github.com/RUC-NLPIR/FlashRAG) for experimental methodology
-- [FlexRAG](https://github.com/ictnlp/FlexRAG) for component integration
-- [LevelRAG](https://github.com/microsoft/LevelRAG) for architectural inspiration
+- [FlashRAG](https://github.com/RUC-NLPIR/FlashRAG) 提供实验方法论
+- [FlexRAG](https://github.com/ictnlp/FlexRAG) 提供组件集成
+- [LevelRAG](https://github.com/microsoft/LevelRAG) 提供架构灵感
 
-## 📞 Contact
+## 📞 联系方式
 
-- **Author**: Your Name
-- **Email**: your.email@example.com
+- **作者**: Your Name
+- **邮箱**: your.email@example.com
 - **GitHub**: [@your-username](https://github.com/your-username)
 
 ---
 
-**🎯 AdaptiveRAG: Making RAG systems truly adaptive and intelligent!**
+**🎯 AdaptiveRAG: 让 RAG 系统真正自适应和智能！**

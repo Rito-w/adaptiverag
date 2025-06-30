@@ -1,52 +1,52 @@
-# 🚀 Quick Start Guide
+# 🚀 快速开始指南
 
-Get up and running with AdaptiveRAG in just a few minutes!
+只需几分钟即可启动并运行 AdaptiveRAG！
 
-## 📋 Prerequisites
+## 📋 前置要求
 
-Make sure you have AdaptiveRAG installed. If not, see the [Installation Guide](installation.md).
+确保您已安装 AdaptiveRAG。如果没有，请参见 [安装指南](installation.md)。
 
 ```bash
 pip install adaptiverag
 ```
 
-## 🎯 Basic Usage
+## 🎯 基本用法
 
-### Your First AdaptiveRAG Query
+### 您的第一个 AdaptiveRAG 查询
 
 ```python
 from adaptive_rag import AdaptiveRAG
 
-# Initialize AdaptiveRAG with default settings
+# 使用默认设置初始化 AdaptiveRAG
 rag = AdaptiveRAG()
 
-# Ask a question
-result = rag.answer("What are the latest developments in quantum computing?")
+# 提出问题
+result = rag.answer("量子计算的最新发展是什么？")
 
-# Print the response
-print("Answer:", result.answer)
-print("Sources:", len(result.sources))
-print("Processing time:", result.processing_time)
+# 打印响应
+print("答案:", result.answer)
+print("来源:", len(result.sources))
+print("处理时间:", result.processing_time)
 ```
 
-### Understanding the Response
+### 理解响应
 
-The `answer()` method returns a response object with:
+`answer()` 方法返回一个响应对象，包含：
 
-- **`answer`**: The generated response text
-- **`sources`**: List of retrieved documents used
-- **`processing_time`**: Time taken to process the query
-- **`retrieval_results`**: Detailed retrieval information
-- **`generation_result`**: Generation metadata
+- **`answer`**: 生成的响应文本
+- **`sources`**: 使用的检索文档列表
+- **`processing_time`**: 处理查询所用时间
+- **`retrieval_results`**: 详细的检索信息
+- **`generation_result`**: 生成元数据
 
-## ⚙️ Configuration
+## ⚙️ 配置
 
-### Basic Configuration
+### 基本配置
 
 ```python
 from adaptive_rag.config import AdaptiveRAGConfig
 
-# Create custom configuration
+# 创建自定义配置
 config = AdaptiveRAGConfig(
     dataset_name="natural_questions",
     retrieval_topk=10,
@@ -54,16 +54,16 @@ config = AdaptiveRAGConfig(
     enable_reranking=True
 )
 
-# Initialize with custom config
+# 使用自定义配置初始化
 rag = AdaptiveRAG(config)
 ```
 
-### YAML Configuration
+### YAML 配置
 
-Create a config file `my_config.yaml`:
+创建配置文件 `my_config.yaml`：
 
 ```yaml
-# AdaptiveRAG Configuration
+# AdaptiveRAG 配置
 dataset_name: "hotpot_qa"
 retrieval_topk: 15
 adaptive_retrieval:
@@ -77,7 +77,7 @@ generation_params:
   temperature: 0.1
 ```
 
-Load the configuration:
+加载配置：
 
 ```python
 from adaptive_rag.config import AdaptiveRAGConfig
@@ -86,50 +86,50 @@ config = AdaptiveRAGConfig(config_file_path="my_config.yaml")
 rag = AdaptiveRAG(config)
 ```
 
-## 🧪 Running Experiments
+## 🧪 运行实验
 
-### Quick Test
+### 快速测试
 
 ```bash
-# Test the framework
+# 测试框架
 python quick_test.py
 ```
 
-### Simple Experiment
+### 简单实验
 
 ```python
 from adaptive_rag.evaluation import BenchmarkRunner, BenchmarkConfig
 
-# Configure experiment
+# 配置实验
 config = BenchmarkConfig(
     datasets=["natural_questions"],
     methods=["adaptive_rag", "naive_rag"],
     output_dir="./my_experiment",
-    max_samples=10,  # Small test
+    max_samples=10,  # 小规模测试
     save_predictions=True
 )
 
-# Run experiment
+# 运行实验
 runner = BenchmarkRunner(config)
 runner.run_benchmark()
 ```
 
-### Command Line Experiments
+### 命令行实验
 
 ```bash
-# Quick experiment with sample data
+# 使用样本数据的快速实验
 python run_experiments.py quick --sample-data
 
-# Full evaluation
+# 完整评估
 python run_experiments.py full
 
-# Ablation study
+# 消融研究
 python run_experiments.py ablation
 ```
 
-## 🔧 Advanced Usage
+## 🔧 高级用法
 
-### Custom Retrieval Strategy
+### 自定义检索策略
 
 ```python
 from adaptive_rag.config import AdaptiveRAGConfig
@@ -152,13 +152,13 @@ config = AdaptiveRAGConfig(
 rag = AdaptiveRAG(config)
 ```
 
-### Batch Processing
+### 批量处理
 
 ```python
 questions = [
-    "What is machine learning?",
-    "How does neural network training work?",
-    "What are the applications of NLP?"
+    "什么是机器学习？",
+    "神经网络训练是如何工作的？",
+    "自然语言处理有哪些应用？"
 ]
 
 results = []
@@ -170,19 +170,19 @@ for question in questions:
         "confidence": result.confidence_score
     })
 
-# Print results
+# 打印结果
 for i, result in enumerate(results):
-    print(f"\nQ{i+1}: {result['question']}")
-    print(f"A{i+1}: {result['answer']}")
-    print(f"Confidence: {result['confidence']:.2f}")
+    print(f"\n问题{i+1}: {result['question']}")
+    print(f"答案{i+1}: {result['answer']}")
+    print(f"置信度: {result['confidence']:.2f}")
 ```
 
-### Using with FlexRAG Components
+### 与 FlexRAG 组件一起使用
 
 ```python
 from adaptive_rag.config import AdaptiveRAGConfig
 
-# Enable FlexRAG integration
+# 启用 FlexRAG 集成
 config = AdaptiveRAGConfig(
     flexrag_integration=True,
     retriever_types=['bm25', 'dpr', 'contriever'],
@@ -193,9 +193,9 @@ config = AdaptiveRAGConfig(
 rag = AdaptiveRAG(config)
 ```
 
-## 📊 Evaluation and Analysis
+## 📊 评估和分析
 
-### Evaluate on Standard Datasets
+### 在标准数据集上评估
 
 ```python
 from adaptive_rag.evaluation import BenchmarkRunner, BenchmarkConfig
@@ -211,16 +211,16 @@ config = BenchmarkConfig(
 runner = BenchmarkRunner(config)
 results = runner.run_benchmark()
 
-# Print summary
+# 打印摘要
 for result in results:
-    print(f"Dataset: {result.dataset_name}")
-    print(f"Exact Match: {result.exact_match:.3f}")
-    print(f"F1 Score: {result.f1_score:.3f}")
+    print(f"数据集: {result.dataset_name}")
+    print(f"精确匹配: {result.exact_match:.3f}")
+    print(f"F1 分数: {result.f1_score:.3f}")
     print(f"ROUGE-L: {result.rouge_l:.3f}")
     print("---")
 ```
 
-### Compare with Baselines
+### 与基线方法比较
 
 ```python
 config = BenchmarkConfig(
@@ -233,23 +233,23 @@ config = BenchmarkConfig(
 runner = BenchmarkRunner(config)
 runner.run_benchmark()
 
-# Results will be saved in ./comparison_results/
+# 结果将保存在 ./comparison_results/ 中
 ```
 
-## 🌐 Web Interface
+## 🌐 Web 界面
 
-Launch the interactive web interface:
+启动交互式 Web 界面：
 
 ```bash
 cd adaptive_rag/webui
 python interface.py --host 0.0.0.0 --port 7860
 ```
 
-Then open your browser to `http://localhost:7860` to use the graphical interface.
+然后在浏览器中打开 `http://localhost:7860` 使用图形界面。
 
-## 📈 Monitoring and Debugging
+## 📈 监控和调试
 
-### Enable Debug Mode
+### 启用调试模式
 
 ```python
 config = AdaptiveRAGConfig(
@@ -261,78 +261,78 @@ config = AdaptiveRAGConfig(
 rag = AdaptiveRAG(config)
 ```
 
-### Access Intermediate Results
+### 访问中间结果
 
 ```python
-result = rag.answer("What is artificial intelligence?")
+result = rag.answer("什么是人工智能？")
 
-# Check task decomposition
+# 检查任务分解
 if hasattr(result, 'task_decomposition'):
-    print("Subtasks:", result.task_decomposition.subtasks)
+    print("子任务:", result.task_decomposition.subtasks)
 
-# Check retrieval strategy
+# 检查检索策略
 if hasattr(result, 'retrieval_strategy'):
-    print("Strategy:", result.retrieval_strategy.selected_methods)
+    print("策略:", result.retrieval_strategy.selected_methods)
 
-# Check retrieved documents
+# 检查检索到的文档
 for i, doc in enumerate(result.sources[:3]):
-    print(f"Doc {i+1}: {doc.title}")
-    print(f"Score: {doc.score:.3f}")
-    print(f"Content: {doc.content[:100]}...")
+    print(f"文档 {i+1}: {doc.title}")
+    print(f"分数: {doc.score:.3f}")
+    print(f"内容: {doc.content[:100]}...")
     print("---")
 ```
 
-## 🎯 Common Use Cases
+## 🎯 常见用例
 
-### 1. Question Answering
-
-```python
-# Factual questions
-result = rag.answer("What is the capital of France?")
-
-# Complex reasoning
-result = rag.answer("Compare the environmental impact of solar and wind energy.")
-
-# Recent information
-result = rag.answer("What are the latest developments in AI safety?")
-```
-
-### 2. Research Assistant
+### 1. 问答
 
 ```python
-# Literature review
-result = rag.answer("Summarize recent advances in transformer architectures.")
+# 事实性问题
+result = rag.answer("法国的首都是什么？")
 
-# Technical explanations
-result = rag.answer("Explain the attention mechanism in neural networks.")
+# 复杂推理
+result = rag.answer("比较太阳能和风能的环境影响。")
+
+# 最新信息
+result = rag.answer("AI 安全领域的最新发展是什么？")
 ```
 
-### 3. Educational Support
+### 2. 研究助手
 
 ```python
-# Concept explanation
-result = rag.answer("Explain quantum entanglement in simple terms.")
+# 文献综述
+result = rag.answer("总结 Transformer 架构的最新进展。")
 
-# Problem solving
-result = rag.answer("How do you solve quadratic equations?")
+# 技术解释
+result = rag.answer("解释神经网络中的注意力机制。")
 ```
 
-## 🔗 Next Steps
+### 3. 教育支持
 
-Now that you're up and running:
+```python
+# 概念解释
+result = rag.answer("用简单的术语解释量子纠缠。")
 
-1. **Explore the [Architecture](architecture.md)** to understand how AdaptiveRAG works
-2. **Read the [Experiments Guide](experiments.md)** for detailed evaluation
-3. **Check the [API Reference](api/)** for advanced usage
-4. **Join the [Community](https://github.com/Rito-w/adaptiverag/discussions)** for support and discussions
+# 问题解决
+result = rag.answer("如何解二次方程？")
+```
 
-## 📞 Getting Help
+## 🔗 下一步
 
-- 📖 **Documentation**: Browse the full documentation
-- 🐛 **Issues**: Report bugs on [GitHub Issues](https://github.com/Rito-w/adaptiverag/issues)
-- 💬 **Discussions**: Ask questions in [GitHub Discussions](https://github.com/Rito-w/adaptiverag/discussions)
-- 📧 **Email**: Contact the maintainers
+现在您已经启动并运行：
+
+1. **探索 [架构](architecture.md)** 了解 AdaptiveRAG 的工作原理
+2. **阅读 [实验指南](experiments.md)** 进行详细评估
+3. **查看 [API 参考](api/)** 了解高级用法
+4. **加入 [社区](https://github.com/Rito-w/adaptiverag/discussions)** 获得支持和讨论
+
+## 📞 获取帮助
+
+- 📖 **文档**: 浏览完整文档
+- 🐛 **问题**: 在 [GitHub Issues](https://github.com/Rito-w/adaptiverag/issues) 报告错误
+- 💬 **讨论**: 在 [GitHub Discussions](https://github.com/Rito-w/adaptiverag/discussions) 提问
+- 📧 **邮箱**: 联系维护者
 
 ---
 
-**🎉 You're all set! Start building amazing RAG applications with AdaptiveRAG!**
+**🎉 您已准备就绪！开始使用 AdaptiveRAG 构建出色的 RAG 应用程序！**
