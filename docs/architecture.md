@@ -13,19 +13,111 @@ AdaptiveRAG follows three key principles:
 ## 🔄 Pipeline Flow
 
 ```mermaid
-graph TD
-    A[User Query] --> B[Task Decomposer]
-    B --> C[Retrieval Planner]
-    C --> D[Multi-Retriever System]
-    D --> E[Context Reranker]
-    E --> F[Adaptive Generator]
-    F --> G[Final Response]
-    
-    B --> H[Query Analysis]
-    C --> I[Strategy Selection]
-    D --> J[Multi-modal Retrieval]
-    E --> K[Context Optimization]
-    F --> L[Response Generation]
+flowchart TD
+    A[🔍 User Query] --> B[🧩 Task Decomposer]
+    B --> C[📋 Retrieval Planner]
+    C --> D[🔗 Multi-Retriever System]
+    D --> E[🎯 Context Reranker]
+    E --> F[✨ Adaptive Generator]
+    F --> G[📝 Final Response]
+
+    B --> H[Query Analysis<br/>• Complexity Assessment<br/>• Task Classification]
+    C --> I[Strategy Selection<br/>• Method Weighting<br/>• Resource Allocation]
+    D --> J[Multi-modal Retrieval<br/>• Keyword Search<br/>• Dense Retrieval<br/>• Web Search]
+    E --> K[Context Optimization<br/>• Relevance Scoring<br/>• Diversity Promotion]
+    F --> L[Response Generation<br/>• Template Selection<br/>• Content Synthesis]
+
+    style A fill:#e1f5fe
+    style G fill:#e8f5e8
+    style B fill:#fff3e0
+    style C fill:#fff3e0
+    style D fill:#fff3e0
+    style E fill:#fff3e0
+    style F fill:#fff3e0
+```
+
+## 🏗️ Detailed Architecture
+
+```mermaid
+graph TB
+    subgraph "Input Layer"
+        Q[User Query]
+    end
+
+    subgraph "Analysis Layer"
+        TD[Task Decomposer]
+        QA[Query Analyzer]
+        TC[Task Classifier]
+    end
+
+    subgraph "Planning Layer"
+        RP[Retrieval Planner]
+        SS[Strategy Selector]
+        WM[Weight Manager]
+    end
+
+    subgraph "Retrieval Layer"
+        MR[Multi-Retriever]
+        KR[Keyword Retriever]
+        DR[Dense Retriever]
+        WR[Web Retriever]
+        RF[Result Fusion]
+    end
+
+    subgraph "Optimization Layer"
+        CR[Context Reranker]
+        RS[Relevance Scorer]
+        DP[Diversity Promoter]
+        CO[Context Optimizer]
+    end
+
+    subgraph "Generation Layer"
+        AG[Adaptive Generator]
+        TS[Template Selector]
+        CS[Content Synthesizer]
+        QC[Quality Controller]
+    end
+
+    subgraph "Output Layer"
+        R[Final Response]
+    end
+
+    Q --> TD
+    TD --> QA
+    QA --> TC
+    TC --> RP
+    RP --> SS
+    SS --> WM
+    WM --> MR
+    MR --> KR
+    MR --> DR
+    MR --> WR
+    KR --> RF
+    DR --> RF
+    WR --> RF
+    RF --> CR
+    CR --> RS
+    RS --> DP
+    DP --> CO
+    CO --> AG
+    AG --> TS
+    TS --> CS
+    CS --> QC
+    QC --> R
+
+    classDef inputOutput fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef analysis fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef planning fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef retrieval fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef optimization fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef generation fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+
+    class Q,R inputOutput
+    class TD,QA,TC analysis
+    class RP,SS,WM planning
+    class MR,KR,DR,WR,RF retrieval
+    class CR,RS,DP,CO optimization
+    class AG,TS,CS,QC generation
 ```
 
 ## 🧩 Component Details

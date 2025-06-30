@@ -9,6 +9,7 @@
 
 * **Core Concepts**
   * [🏗️ Architecture](architecture.md)
+  * [📊 Diagrams & Visualizations](diagrams.md)
   * [🧠 Task Decomposition](task-decomposition.md)
   * [🔍 Retrieval Planning](retrieval-planning.md)
   * [🔗 Multi-Retriever Fusion](multi-retriever.md)

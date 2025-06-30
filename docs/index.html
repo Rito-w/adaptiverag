@@ -7,6 +7,7 @@
   <meta name="description" content="AdaptiveRAG - Intelligent Adaptive Retrieval-Augmented Generation">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <link rel="stylesheet" href="//unpkg.com/mermaid/dist/mermaid.min.css" />
   <link rel="icon" href="_media/favicon.ico">
   
   <!-- Custom CSS -->
@@ -110,7 +111,47 @@
         auth: 'by AdaptiveRAG Team',
         pre: '<hr/>',
         style: 'text-align: center;'
-      }
+      },
+
+      // Mermaid support
+      markdown: {
+        renderer: {
+          code: function(code, lang) {
+            var html = '';
+            // 检测 mermaid 代码块
+            if (lang === 'mermaid' || code.match(/^sequenceDiagram/) || code.match(/^graph/) || code.match(/^gantt/) || code.match(/^flowchart/) || code.match(/^classDiagram/) || code.match(/^stateDiagram/)) {
+              // 生成 mermaid 图表容器
+              html = '<div class="mermaid">' + code + '</div>';
+            }
+            // 使用 Prism 高亮显示源码
+            var hl = Prism.highlight(code, Prism.languages[lang] || Prism.languages.markup);
+            return html + '<pre v-pre data-lang="' + lang + '"><code class="lang-' + lang + '">' + hl + '</code></pre>';
+          }
+        }
+      },
+
+      // Mermaid 插件
+      plugins: [
+        function (hook, vm) {
+          hook.ready(function () {
+            // 初始化 mermaid，禁用自动渲染
+            mermaid.initialize({
+              startOnLoad: false,
+              theme: 'default',
+              themeVariables: {
+                primaryColor: '#42b883',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#369870',
+                lineColor: '#369870'
+              }
+            });
+          });
+          hook.doneEach(function () {
+            // 每个页面渲染完成后手动渲染 mermaid 图表
+            mermaid.init(undefined, '.mermaid');
+          });
+        }
+      ]
     }
   </script>
   
@@ -135,5 +176,8 @@
   <!-- Math rendering -->
   <script src="//cdn.jsdelivr.net/npm/docsify-katex@latest/dist/docsify-katex.js"></script>
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css"/>
+
+  <!-- Mermaid diagrams -->
+  <script src="//unpkg.com/mermaid/dist/mermaid.min.js"></script>
 </body>
 </html>
