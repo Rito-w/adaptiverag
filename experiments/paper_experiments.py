@@ -31,10 +31,13 @@ logger = logging.getLogger(__name__)
 
 class PaperExperimentRunner:
     """论文实验运行器"""
-    
-    def __init__(self, output_dir: str = "./experiments/paper_results"):
+
+    def __init__(self, output_dir: str = "/root/autodl-tmp/adaptiverag_experiments",
+                 data_dir: str = "/root/autodl-tmp/adaptiverag_data"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.data_dir = Path(data_dir)
+        self.data_dir.mkdir(parents=True, exist_ok=True)
         
         # 实验配置
         self.datasets = {
