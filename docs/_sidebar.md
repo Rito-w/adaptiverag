@@ -37,6 +37,7 @@
   * [🛠️ Development Guide](development.md)
   * [🧪 Testing](testing.md)
   * [📝 Contributing](contributing.md)
+  * [🚀 GitHub Pages Setup](github-pages-setup.md)
   * [🐛 Troubleshooting](troubleshooting.md)
 
 * **Resources**
@@ -50,4 +51,4 @@
 * **Links**
   * [![Github](https://icongr.am/simple/github.svg?size=16&color=808080&colored=false) GitHub](https://github.com/Rito-w/adaptiverag)
   * [![PyPI](https://icongr.am/simple/pypi.svg?size=16&color=808080&colored=false) PyPI](https://pypi.org/project/adaptiverag/)
-  * [![Docs](https://icongr.am/simple/gitbook.svg?size=16&color=808080&colored=false) Documentation](https://rito-w.github.io/adaptiverag/)
+  * [![Docs](https://icongr.am/simple/gitbook.svg?size=16&color=808080&colored=false) Live Docs](https://rito-w.github.io/adaptiverag/)
