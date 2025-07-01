@@ -6,7 +6,7 @@ import gradio as gr
 from typing import Dict, Any
 
 
-def create_query_tab(engine) -> Dict[str, gr.Component]:
+def create_query_tab(engine) -> Dict[str, Any]:
     """创建查询测试标签页"""
     
     with gr.Tab("🔍 智能检索") as query_tab:
@@ -71,6 +71,12 @@ def create_query_tab(engine) -> Dict[str, gr.Component]:
         # 结果显示区域
         with gr.Row():
             with gr.Column():
+                # 处理流程
+                process_flow = gr.JSON(
+                    label="📈 处理流程",
+                    value={}
+                )
+                
                 # 任务分解结果
                 task_decomposition = gr.JSON(
                     label="🧠 任务分解结果",
@@ -89,6 +95,26 @@ def create_query_tab(engine) -> Dict[str, gr.Component]:
                     lines=15,
                     max_lines=20,
                     show_copy_button=True
+                )
+            
+            with gr.Column():
+                # 生成的答案
+                generated_answer = gr.Textbox(
+                    label="💬 生成的答案",
+                    lines=8,
+                    interactive=False
+                )
+                
+                # 检索到的文档
+                retrieved_docs = gr.JSON(
+                    label="📚 检索到的文档",
+                    value={}
+                )
+                
+                # 优化信息
+                optimization_info = gr.JSON(
+                    label="⚙️ 优化信息",
+                    value={}
                 )
         
         # 性能统计
@@ -114,9 +140,13 @@ def create_query_tab(engine) -> Dict[str, gr.Component]:
         "max_results": max_results,
         "system_status": system_status,
         "corpus_info": corpus_info,
+        "process_flow": process_flow,
         "task_decomposition": task_decomposition,
         "retrieval_strategy": retrieval_strategy,
         "search_results": search_results,
+        "generated_answer": generated_answer,
+        "retrieved_docs": retrieved_docs,
+        "optimization_info": optimization_info,
         "processing_time": processing_time,
         "total_results": total_results
     } 

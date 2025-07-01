@@ -20,19 +20,19 @@ def create_basic_tab(engine) -> Dict[str, gr.Component]:
                 
                 dense_model_path = gr.Textbox(
                     label="向量检索模型路径",
-                    value="./adaptive_rag/models/e5-base-v2",
+                    value=engine.config.get('dense_model_path', "./adaptive_rag/models/e5-base-v2"),
                     placeholder="/path/to/dense/model"
                 )
 
                 generator_model_path = gr.Textbox(
                     label="生成模型路径",
-                    value="./adaptive_rag/models/qwen1.5-1.8b",
+                    value=engine.config.get('generator_model_path', "./adaptive_rag/models/qwen1.5-1.8b"),
                     placeholder="/path/to/generator/model"
                 )
 
                 reranker_model_path = gr.Textbox(
                     label="重排序模型路径",
-                    value="./adaptive_rag/models/bge-reranker-base",
+                    value=engine.config.get('reranker_model_path', "./adaptive_rag/models/bge-reranker-base"),
                     placeholder="/path/to/reranker/model"
                 )
             
@@ -42,20 +42,20 @@ def create_basic_tab(engine) -> Dict[str, gr.Component]:
                 
                 corpus_path = gr.Textbox(
                     label="语料库路径",
-                    value="./adaptive_rag/data/general_knowledge.jsonl",
+                    value=engine.config.get('corpus_path', "./adaptive_rag/data/general_knowledge.jsonl"),
                     placeholder="/path/to/corpus.jsonl"
                 )
 
                 index_path = gr.Textbox(
                     label="索引路径",
-                    value="./adaptive_rag/data/e5_Flat.index",
+                    value=engine.config.get('index_path', "./adaptive_rag/data/e5_Flat.index"),
                     placeholder="/path/to/index"
                 )
 
                 batch_size = gr.Slider(
                     minimum=1,
                     maximum=32,
-                    value=engine.config.batch_size,
+                    value=engine.config.get('batch_size', 4),
                     step=1,
                     label="批处理大小"
                 )
