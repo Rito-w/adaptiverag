@@ -50,6 +50,25 @@
       background-color: var(--theme-color-dark);
       border-color: var(--theme-color-dark);
     }
+
+    /* Mermaid 图表样式优化 */
+    .mermaid {
+      text-align: center;
+      margin: 20px 0;
+      background-color: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    /* 确保 Mermaid 图表在小屏幕上也能正常显示 */
+    @media (max-width: 768px) {
+      .mermaid {
+        padding: 10px;
+        margin: 10px 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -117,15 +136,14 @@
       markdown: {
         renderer: {
           code: function(code, lang) {
-            var html = '';
             // 检测 mermaid 代码块
-            if (lang === 'mermaid' || code.match(/^sequenceDiagram/) || code.match(/^graph/) || code.match(/^gantt/) || code.match(/^flowchart/) || code.match(/^classDiagram/) || code.match(/^stateDiagram/)) {
-              // 生成 mermaid 图表容器
-              html = '<div class="mermaid">' + code + '</div>';
+            if (lang === 'mermaid' || code.match(/^sequenceDiagram/) || code.match(/^graph/) || code.match(/^gantt/) || code.match(/^flowchart/) || code.match(/^classDiagram/) || code.match(/^stateDiagram/) || code.match(/^pie/) || code.match(/^xychart/)) {
+              // 只生成 mermaid 图表容器，不显示源码
+              return '<div class="mermaid">' + code + '</div>';
             }
-            // 使用 Prism 高亮显示源码
+            // 对于非 mermaid 代码块，使用 Prism 高亮显示
             var hl = Prism.highlight(code, Prism.languages[lang] || Prism.languages.markup);
-            return html + '<pre v-pre data-lang="' + lang + '"><code class="lang-' + lang + '">' + hl + '</code></pre>';
+            return '<pre v-pre data-lang="' + lang + '"><code class="lang-' + lang + '">' + hl + '</code></pre>';
           }
         }
       },
@@ -140,15 +158,48 @@
               theme: 'default',
               themeVariables: {
                 primaryColor: '#42b883',
-                primaryTextColor: '#fff',
+                primaryTextColor: '#333',
                 primaryBorderColor: '#369870',
-                lineColor: '#369870'
+                lineColor: '#369870',
+                secondaryColor: '#f9f9f9',
+                tertiaryColor: '#fff',
+                background: '#ffffff',
+                mainBkg: '#42b883',
+                secondBkg: '#f0f8f0',
+                tertiaryBkg: '#fafafa'
+              },
+              flowchart: {
+                htmlLabels: true,
+                curve: 'basis'
+              },
+              sequence: {
+                diagramMarginX: 50,
+                diagramMarginY: 10,
+                actorMargin: 50,
+                width: 150,
+                height: 65,
+                boxMargin: 10,
+                boxTextMargin: 5,
+                noteMargin: 10,
+                messageMargin: 35
               }
             });
           });
           hook.doneEach(function () {
             // 每个页面渲染完成后手动渲染 mermaid 图表
-            mermaid.init(undefined, '.mermaid');
+            setTimeout(function() {
+              var mermaidElements = document.querySelectorAll('.mermaid');
+              if (mermaidElements.length > 0) {
+                // 清除之前的渲染结果
+                mermaidElements.forEach(function(element) {
+                  if (element.getAttribute('data-processed') !== 'true') {
+                    element.removeAttribute('data-processed');
+                  }
+                });
+                // 重新渲染所有 mermaid 图表
+                mermaid.init(undefined, '.mermaid:not([data-processed])');
+              }
+            }, 100);
           });
         }
       ]

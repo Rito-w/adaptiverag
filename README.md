@@ -81,21 +81,25 @@ rag = AdaptiveRAG(config)
 
 ## 🧪 实验
 
-### 快速测试
+### 🎯 立即测试（推荐，无需训练数据）
 ```bash
-python quick_test.py
+# 测试增强功能
+python test_enhanced_features.py
+
+# 运行可行性实验
+python run_feasible_experiments.py
 ```
 
-### 运行实验
+### 🔬 完整实验
 ```bash
-# 使用样本数据的快速实验
-python run_experiments.py quick --sample-data
+# 快速实验
+python run_experiments.py --experiment quick
 
 # 完整评估
-python run_experiments.py full
+python run_experiments.py --experiment full
 
 # 消融研究
-python run_experiments.py ablation
+python run_experiments.py --experiment ablation
 
 # 效率分析
 python run_experiments.py efficiency
