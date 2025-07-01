@@ -1,6 +1,19 @@
 <!-- docs/_sidebar.md -->
 
-* [🏠 首页](/)
+* [首页](README.md)
+* [项目结构](PROJECT_STRUCTURE.md)
+* [快速上手](quickstart.md)
+* [安装说明](installation.md)
+* [架构设计](architecture.md)
+* [实验设计](EXPERIMENT_DESIGN.md)
+* [实验方案](experiment-plan.md)
+* [实验记录](experiments.md)
+* [清理与整理总结](PROJECT_CLEANUP_FINAL.md)
+* [结构精简说明](CLEANED_PROJECT_STRUCTURE.md)
+* [实验框架总结](EXPERIMENT_FRAMEWORK_SUMMARY.md)
+* [变更日志](CHANGELOG.md)
+* [贡献指南](CONTRIBUTING.md)
+* [导航](index.html)
 
 * **快速开始**
   * [📦 安装](installation.md)

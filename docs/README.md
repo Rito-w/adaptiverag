@@ -1,37 +1,59 @@
-# 🧠 AdaptiveRAG 文档
+# 🧠 AdaptiveRAG: 智能自适应检索增强生成系统
 
-欢迎来到 **AdaptiveRAG** 的综合文档 - 一个智能的自适应检索增强生成系统，能够根据查询复杂度和上下文需求动态调整检索策略。
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-## 🌟 什么是 AdaptiveRAG？
+AdaptiveRAG 是一个智能的检索增强生成系统，能够根据查询复杂度和上下文需求动态调整检索策略。它集成了多种检索方法，并使用大语言模型驱动的分析来实现最佳性能。
 
-AdaptiveRAG 是下一代 RAG 系统，超越了传统的静态检索方法。它智能地分析查询，分解复杂任务，并动态选择最优检索策略，以提供更准确和上下文相关的响应。
-
-### 核心特性
+## 🌟 核心特性
 
 - **🧠 智能查询分析**: 基于大语言模型的查询理解和任务分解
 - **🔄 自适应检索策略**: 动态选择最优检索方法
 - **🔗 多检索器融合**: 无缝集成关键词、密集向量和网络检索
 - **📊 全面评估**: 与最先进方法的广泛基准测试
 - **🔧 FlexRAG 集成**: 与 FlexRAG 组件深度集成，确保稳定性
+- **📈 实验框架**: 完整的学术研究评估流水线
 
-## 🚀 快速开始
+## 🏗️ 系统架构
 
-只需几个步骤即可开始使用 AdaptiveRAG：
+```
+AdaptiveRAG 流水线:
+查询 → 任务分解 → 策略规划 → 多重检索 → 重排序 → 生成
+```
 
-### 安装
+### 核心组件
 
+1. **任务分解器**: 将复杂查询分解为可管理的子任务
+2. **检索规划器**: 根据查询类型选择最优检索策略
+3. **多重检索器**: 融合多种检索方法的结果
+4. **上下文重排器**: 优化检索到的上下文用于生成
+5. **自适应生成器**: 产生高质量的响应
+
+## 📦 安装
+
+### 前置要求
+- Python 3.8+
+- PyTorch 1.9+
+- CUDA (可选，用于GPU加速)
+
+### 快速安装
 ```bash
-# 从 PyPI 安装
-pip install adaptiverag
+git clone https://github.com/your-username/adaptiverag.git
+cd adaptiverag
+pip install -r requirements.txt
+```
 
-# 或从源码安装
-git clone https://github.com/Rito-w/adaptiverag.git
+### 开发安装
+```bash
+git clone https://github.com/your-username/adaptiverag.git
 cd adaptiverag
 pip install -e .
 ```
 
-### 基本用法
+## 🚀 快速开始
 
+### 基本用法
 ```python
 from adaptive_rag import AdaptiveRAG
 
@@ -43,113 +65,123 @@ result = rag.answer("量子计算的最新发展是什么？")
 print(result.answer)
 ```
 
-### 运行实验
-
-```bash
-# 快速测试
-python quick_test.py
-
-# 运行完整实验
-python run_experiments.py full
-
-# 消融研究
-python run_experiments.py ablation
-```
-
-## 🏗️ 架构概览
-
-AdaptiveRAG 由五个核心组件协同工作：
-
-```mermaid
-graph LR
-    A[查询] --> B[任务分解器]
-    B --> C[检索规划器]
-    C --> D[多重检索器]
-    D --> E[上下文重排器]
-    E --> F[自适应生成器]
-    F --> G[响应]
-```
-
-1. **任务分解器**: 将复杂查询分解为可管理的子任务
-2. **检索规划器**: 根据查询类型选择最优检索策略
-3. **多重检索器**: 融合多种检索方法的结果
-4. **上下文重排器**: 优化检索到的上下文用于生成
-5. **自适应生成器**: 产生高质量的响应
-
-## 📊 性能表现
-
-AdaptiveRAG 已在多个数据集上进行评估，并持续优于基线方法：
-
-| 数据集 | 方法 | EM | F1 | ROUGE-L |
-|---------|--------|----|----|---------|
-| Natural Questions | AdaptiveRAG | **0.52** | **0.66** | **0.71** |
-| | Naive RAG | 0.41 | 0.58 | 0.63 |
-| | Self-RAG | 0.47 | 0.62 | 0.68 |
-| HotpotQA | AdaptiveRAG | **0.38** | **0.51** | **0.58** |
-| | Naive RAG | 0.29 | 0.42 | 0.49 |
-| | Self-RAG | 0.34 | 0.47 | 0.54 |
-
-> 📝 **注意**: 结果来自我们的实验框架。详细分析请参见 [基准测试](benchmarks.md)。
-
-## 🧪 实验框架
-
-AdaptiveRAG 包含一个受 FlashRAG 启发的综合实验框架：
-
-- **标准化评估**: 兼容 FlashRAG 数据集和指标
-- **基线比较**: 实现主要 RAG 方法
-- **消融研究**: 详细的组件贡献分析
-- **可重现结果**: 可配置的学术研究实验
-
-## 🔗 集成
-
-### FlexRAG 集成
-
-AdaptiveRAG 与 FlexRAG 组件深度集成：
-
+### 配置
 ```python
 from adaptive_rag.config import AdaptiveRAGConfig
 
 config = AdaptiveRAGConfig(
-    retrieval_methods=['keyword', 'dense', 'web'],
-    reranking_enabled=True,
-    flexrag_integration=True
+    dataset_name="natural_questions",
+    retrieval_topk=10,
+    enable_task_decomposition=True,
+    enable_multi_retriever=True
 )
+
+rag = AdaptiveRAG(config)
 ```
 
-### FlashRAG 兼容性
+## 🧪 实验
 
-使用 FlashRAG 数据集和评估指标：
+### 🎯 立即测试（推荐，无需训练数据）
+```bash
+# 测试增强功能
+python test_enhanced_features.py
 
-```python
-from adaptive_rag.evaluation import BenchmarkRunner
-
-runner = BenchmarkRunner(
-    datasets=['natural_questions', 'hotpot_qa'],
-    methods=['adaptive_rag', 'naive_rag'],
-    flashrag_compatible=True
-)
+# 运行可行性实验
+python run_feasible_experiments.py
 ```
 
-## 📚 文档结构
+### 🔬 完整实验
+```bash
+# 快速实验
+python run_experiments.py --experiment quick
 
-本文档分为以下几个部分：
+# 完整评估
+python run_experiments.py --experiment full
 
-- **[快速开始](installation.md)**: 安装、配置和基本使用
-- **[核心概念](architecture.md)**: 深入了解 AdaptiveRAG 的架构
-- **[集成指南](flexrag-integration.md)**: 如何与现有系统集成
-- **[实验指南](experiments.md)**: 运行实验和评估
-- **[API 参考](api/)**: 完整的 API 文档
-- **[开发指南](development.md)**: 贡献和扩展 AdaptiveRAG
+# 消融研究
+python run_experiments.py --experiment ablation
 
-## 🤝 社区
+# 效率分析
+python run_experiments.py efficiency
+```
 
-加入我们不断壮大的社区：
+### 生成论文结果
+```bash
+python run_experiments.py paper
+```
 
-- **GitHub**: [Rito-w/adaptiverag](https://github.com/Rito-w/adaptiverag)
-- **问题反馈**: [报告错误或请求功能](https://github.com/Rito-w/adaptiverag/issues)
-- **讨论**: [加入对话](https://github.com/Rito-w/adaptiverag/discussions)
+## 📊 基准测试
 
-## 📄 引用
+AdaptiveRAG 已在多个数据集上进行评估：
+
+| 数据集 | EM | F1 | ROUGE-L | BERTScore |
+|---------|----|----|---------|-----------|
+| Natural Questions | - | - | - | - |
+| HotpotQA | - | - | - | - |
+| TriviaQA | - | - | - | - |
+| MS MARCO | - | - | - | - |
+
+*结果将在运行完整实验后更新*
+
+## 📁 项目结构
+
+```
+adaptiverag/
+├── adaptive_rag/              # AdaptiveRAG 核心实现
+│   ├── core/                  # 核心组件
+│   ├── modules/               # 独立模块
+│   ├── pipeline/              # 流水线实现
+│   ├── evaluation/            # 评估框架
+│   ├── config/                # 配置文件
+│   └── utils/                 # 工具函数
+├── experiments/               # 实验结果
+├── data/                      # 数据集存储
+├── docs/                      # 文档
+├── tests/                     # 单元测试
+├── scripts/                   # 工具脚本
+└── requirements.txt           # 依赖项
+```
+
+## 🔧 配置
+
+AdaptiveRAG 支持通过 YAML 文件和 Python 字典进行灵活配置：
+
+```yaml
+# config.yaml
+dataset_name: "natural_questions"
+retrieval_topk: 10
+adaptive_retrieval:
+  enable_task_decomposition: true
+  enable_strategy_planning: true
+  enable_multi_retriever: true
+  enable_reranking: true
+```
+
+## 📚 文档
+
+- [安装指南](docs/installation.md)
+- [配置参考](docs/configuration.md)
+- [API 文档](docs/api.md)
+- [实验指南](docs/experiments.md)
+- [FlexRAG 集成](adaptive_rag/FLEXRAG_INTEGRATION.md)
+
+## 🤝 贡献
+
+我们欢迎贡献！请查看我们的[贡献指南](CONTRIBUTING.md)了解详情。
+
+### 开发环境设置
+```bash
+git clone https://github.com/your-username/adaptiverag.git
+cd adaptiverag
+pip install -e ".[dev]"
+pre-commit install
+```
+
+## 📄 许可证
+
+本项目采用 MIT 许可证 - 详情请查看 [LICENSE](LICENSE) 文件。
+
+## 📖 引用
 
 如果您在研究中使用 AdaptiveRAG，请引用：
 
@@ -162,15 +194,18 @@ runner = BenchmarkRunner(
 }
 ```
 
-## 📞 支持
+## 🙏 致谢
 
-需要帮助？我们为您提供支持：
+- [FlashRAG](https://github.com/RUC-NLPIR/FlashRAG) 提供实验方法论
+- [FlexRAG](https://github.com/ictnlp/FlexRAG) 提供组件集成
+- [LevelRAG](https://github.com/microsoft/LevelRAG) 提供架构灵感
 
-- 📖 **文档**: 您正在阅读的内容！
-- 🐛 **错误报告**: [GitHub Issues](https://github.com/Rito-w/adaptiverag/issues)
-- 💬 **问题咨询**: [GitHub Discussions](https://github.com/Rito-w/adaptiverag/discussions)
-- 📧 **邮箱**: adaptiverag@example.com
+## 📞 联系方式
+
+- **作者**: Your Name
+- **邮箱**: your.email@example.com
+- **GitHub**: [@your-username](https://github.com/your-username)
 
 ---
 
-**准备开始了吗？** 查看我们的 [安装指南](installation.md) 或深入了解 [快速开始](quickstart.md) 教程！
+**🎯 AdaptiveRAG: 让 RAG 系统真正自适应和智能！**

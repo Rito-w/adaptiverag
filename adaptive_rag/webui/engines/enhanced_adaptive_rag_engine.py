@@ -50,17 +50,25 @@ class EnhancedAdaptiveRAGEngine:
 
     def __init__(self, config_path: str = "real_config.yaml"):
         """初始化引擎"""
+        logger.info("🚀 开始初始化增强版 AdaptiveRAG 引擎")
+        logger.info(f"   配置文件路径: {config_path}")
+        
         self.config_path = config_path
+        logger.info("📋 步骤1: 加载配置文件...")
         self.config = self.load_config()
+        logger.info("✅ 配置文件加载完成")
+        
         self.last_results = None
         
-        # 初始化各个优化模块
+        logger.info("🔧 步骤2: 初始化优化模块...")
         self.initialize_optimization_modules()
+        logger.info("✅ 优化模块初始化完成")
         
-        # 初始化真实组件
+        logger.info("🤖 步骤3: 初始化真实组件...")
         self.initialize_real_components()
+        logger.info("✅ 真实组件初始化完成")
 
-        logger.info("🚀 增强版 AdaptiveRAG 引擎初始化完成")
+        logger.info("🎉 增强版 AdaptiveRAG 引擎初始化完成")
         logger.info(f"   配置文件: {self.config_path}")
 
     def load_config(self) -> Dict[str, Any]:
@@ -90,42 +98,70 @@ class EnhancedAdaptiveRAGEngine:
 
     def initialize_optimization_modules(self):
         """初始化优化模块"""
+        logger.info("   📦 创建优化模块字典...")
         self.optimization_modules = {}
         
         # 初始化资源感知优化器
+        logger.info("   🔍 检查资源感知优化器可用性...")
         if RESOURCE_OPTIMIZER_AVAILABLE:
+            logger.info("   ✅ 资源感知优化器模块可用，开始初始化...")
             try:
+                logger.info("   🔧 创建 ResourceAwareOptimizer 实例...")
                 self.optimization_modules['resource_aware'] = ResourceAwareOptimizer(self.config)
-                logger.info("✅ 资源感知优化器初始化成功")
+                logger.info("   ✅ 资源感知优化器初始化成功")
             except Exception as e:
-                logger.error(f"❌ 资源感知优化器初始化失败: {e}")
+                logger.error(f"   ❌ 资源感知优化器初始化失败: {e}")
+                import traceback
+                logger.error(f"   详细错误: {traceback.format_exc()}")
+        else:
+            logger.warning("   ⚠️ 资源感知优化器模块不可用")
         
         # 初始化多维度优化器
+        logger.info("   🎯 检查多维度优化器可用性...")
         if MULTI_DIM_OPTIMIZER_AVAILABLE:
+            logger.info("   ✅ 多维度优化器模块可用，开始初始化...")
             try:
+                logger.info("   🔧 创建 MultiDimensionalOptimizer 实例...")
                 self.optimization_modules['multi_dimensional'] = MultiDimensionalOptimizer(self.config)
-                logger.info("✅ 多维度优化器初始化成功")
+                logger.info("   ✅ 多维度优化器初始化成功")
             except Exception as e:
-                logger.error(f"❌ 多维度优化器初始化失败: {e}")
+                logger.error(f"   ❌ 多维度优化器初始化失败: {e}")
+                import traceback
+                logger.error(f"   详细错误: {traceback.format_exc()}")
+        else:
+            logger.warning("   ⚠️ 多维度优化器模块不可用")
         
         # 初始化性能优化器
+        logger.info("   ⚡ 检查性能优化器可用性...")
         if PERFORMANCE_OPTIMIZER_AVAILABLE:
+            logger.info("   ✅ 性能优化器模块可用，开始初始化...")
             try:
+                logger.info("   🔧 创建 PerformanceOptimizer 实例...")
                 self.optimization_modules['performance'] = PerformanceOptimizer(self.config)
-                logger.info("✅ 性能优化器初始化成功")
+                logger.info("   ✅ 性能优化器初始化成功")
             except Exception as e:
-                logger.error(f"❌ 性能优化器初始化失败: {e}")
+                logger.error(f"   ❌ 性能优化器初始化失败: {e}")
+                import traceback
+                logger.error(f"   详细错误: {traceback.format_exc()}")
+        else:
+            logger.warning("   ⚠️ 性能优化器模块不可用")
 
     def initialize_real_components(self):
         """初始化真实组件"""
+        logger.info("   🤖 开始初始化真实 FlexRAG 组件...")
         try:
+            logger.info("   📦 导入 FlexRAG 相关模块...")
             # 尝试初始化真实的 FlexRAG 组件
             from adaptive_rag.core.flexrag_integrated_assistant import FlexRAGIntegratedAssistant
             from adaptive_rag.config import create_flexrag_integrated_config
+            logger.info("   ✅ FlexRAG 模块导入成功")
 
+            logger.info("   ⚙️ 创建 FlexRAG 集成配置...")
             # 使用真实配置创建助手
             config = create_flexrag_integrated_config()
+            logger.info("   ✅ 基础配置创建成功")
             
+            logger.info("   🔧 更新检索器配置...")
             # 更新配置以使用真实组件
             if 'retriever_configs' in self.config:
                 for name, retriever_config in self.config['retriever_configs'].items():
@@ -138,7 +174,9 @@ class EnhancedAdaptiveRAGEngine:
                         for key, value in retriever_config.items():
                             if key not in ['retriever_type']:
                                 config.retriever_configs[name]['config'][key] = value
+                logger.info(f"   ✅ 更新了 {len(self.config['retriever_configs'])} 个检索器配置")
             
+            logger.info("   📊 更新重排序器配置...")
             if 'ranker_configs' in self.config:
                 for name, ranker_config in self.config['ranker_configs'].items():
                     if name in config.ranker_configs:
@@ -149,7 +187,9 @@ class EnhancedAdaptiveRAGEngine:
                         for key, value in ranker_config.items():
                             if key not in ['ranker_type']:
                                 config.ranker_configs[name]['config'][key] = value
+                logger.info(f"   ✅ 更新了 {len(self.config['ranker_configs'])} 个重排序器配置")
             
+            logger.info("   🤖 更新生成器配置...")
             if 'generator_configs' in self.config:
                 for name, generator_config in self.config['generator_configs'].items():
                     if name in config.generator_configs:
@@ -160,17 +200,23 @@ class EnhancedAdaptiveRAGEngine:
                         for key, value in generator_config.items():
                             if key not in ['generator_type']:
                                 config.generator_configs[name]['config'][key] = value
+                logger.info(f"   ✅ 更新了 {len(self.config['generator_configs'])} 个生成器配置")
             
+            logger.info("   🖥️ 更新设备配置...")
             # 更新设备配置
             config.device = self.config.get('device', 'cuda')
             config.batch_size = self.config.get('batch_size', 4)
+            logger.info(f"   ✅ 设备: {config.device}, 批次大小: {config.batch_size}")
             
+            logger.info("   🚀 创建 FlexRAGIntegratedAssistant 实例...")
             self.assistant = FlexRAGIntegratedAssistant(config)
             self.use_real_components = True
-            logger.info("✅ 真实 FlexRAG 组件初始化成功")
+            logger.info("   ✅ 真实 FlexRAG 组件初始化成功")
 
         except Exception as e:
-            logger.warning(f"⚠️ 真实组件初始化失败，使用模拟实现: {e}")
+            logger.warning(f"   ⚠️ 真实组件初始化失败，使用模拟实现: {e}")
+            import traceback
+            logger.error(f"   详细错误: {traceback.format_exc()}")
             self.assistant = None
             self.use_real_components = False
 
