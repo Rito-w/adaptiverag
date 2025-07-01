@@ -10,6 +10,7 @@
 """
 
 import logging
+import time
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
@@ -35,6 +36,9 @@ class QueryResult:
 from .query_analyzer import QueryAnalyzer
 from .strategy_router import StrategyRouter
 from .hybrid_retriever import HybridRetriever
+from .intelligent_strategy_learner import IntelligentStrategyLearner, PerformanceMetrics
+from .performance_optimizer import PerformanceOptimizer
+from .multi_dimensional_optimizer import MultiDimensionalOptimizer, OptimizationObjective, ResourceConstraints
 
 logger = logging.getLogger(__name__)
 
@@ -84,60 +88,104 @@ class AdaptiveAssistant(BasicAssistant):
         """初始化自适应助手"""
         super().__init__(cfg)
         self.cfg = cfg
-        
+
         # 初始化核心组件
         self.query_analyzer = QueryAnalyzer(cfg)
         self.strategy_router = StrategyRouter(cfg)
         self.hybrid_retriever = HybridRetriever(cfg)
-        
-        logger.info("AdaptiveAssistant 初始化完成")
+
+        # 初始化新的智能组件
+        self.intelligent_learner = IntelligentStrategyLearner(cfg)
+        self.performance_optimizer = PerformanceOptimizer(cfg.__dict__)
+        self.multi_dim_optimizer = MultiDimensionalOptimizer(cfg.__dict__)
+
+        # 性能统计
+        self.query_count = 0
+        self.total_processing_time = 0.0
+
+        logger.info("AdaptiveAssistant 初始化完成 (包含智能学习组件)")
     
-    def answer(self, query: str, **kwargs) -> QueryResult:
+    def answer(self, query: str, optimization_objective: OptimizationObjective = OptimizationObjective.BALANCED, **kwargs) -> QueryResult:
         """
-        主要的问答方法 - 实现自适应 RAG 流程
-        
-        流程：
-        1. 查询分析和分解
-        2. 策略路由
-        3. 混合检索
-        4. 智能聚合
-        5. 生成答案
+        主要的问答方法 - 实现智能自适应 RAG 流程
+
+        增强流程：
+        1. 智能查询分析和复杂度评估
+        2. 多维度策略优化
+        3. 性能优化的混合检索
+        4. 智能聚合和生成
+        5. 性能反馈学习
         """
+        start_time = time.time()
         logger.info(f"开始处理查询: {query}")
-        
+
         try:
-            # 第一步：查询分析和分解
+            # 第一步：智能查询分析
             analysis_result = self.query_analyzer.analyze_query(query)
-            logger.info(f"查询分析完成: {analysis_result}")
-            
-            # 第二步：策略路由
-            strategy = self.strategy_router.route_strategy(analysis_result)
-            logger.info(f"策略路由完成: {strategy}")
-            
-            # 第三步：混合检索
-            retrieved_contexts = self.hybrid_retriever.retrieve(
-                query=query,
-                analysis_result=analysis_result,
-                strategy=strategy
+
+            # 第二步：智能策略学习和预测
+            strategy_prediction = self.intelligent_learner.predict_optimal_strategy(query)
+            query_features = strategy_prediction['query_features']
+
+            # 第三步：多维度策略优化
+            available_strategies = [
+                strategy_prediction['strategy_config'],
+                {'keyword': 0.6, 'dense': 0.3, 'web': 0.1},  # 保守策略
+                {'keyword': 0.2, 'dense': 0.7, 'web': 0.1},  # 激进策略
+            ]
+
+            optimal_strategy = self.multi_dim_optimizer.optimize_strategy(
+                query_features=query_features.__dict__,
+                available_strategies=available_strategies,
+                objective=optimization_objective,
+                constraints=kwargs.get('constraints')
             )
+
+            logger.info(f"选择策略: {optimal_strategy.config}, 置信度: {strategy_prediction['confidence']:.3f}")
+
+            # 第四步：性能优化的检索
+            def retrieval_func():
+                return self.hybrid_retriever.retrieve(
+                    query=query,
+                    analysis_result=analysis_result,
+                    strategy={'strategy': optimal_strategy.config}
+                )
+
+            retrieved_contexts = self.performance_optimizer.optimize_query_processing(
+                query=query,
+                strategy_config=optimal_strategy.config,
+                processing_func=retrieval_func
+            )
+
             logger.info(f"检索完成，获得 {len(retrieved_contexts)} 个文档")
-            
-            # 第四步：生成答案（使用 FlexRAG 的生成能力）
+
+            # 第五步：生成答案
             answer = self._generate_answer(query, retrieved_contexts)
-            
-            # 构建结果
+
+            # 第六步：记录性能并学习
+            processing_time = time.time() - start_time
+            self._record_performance(query, optimal_strategy.config, processing_time, answer)
+
+            # 构建增强结果
             result = QueryResult(
                 query=query,
                 answer=answer,
                 retrieved_contexts=retrieved_contexts,
                 metadata={
                     "analysis_result": analysis_result,
-                    "strategy": strategy,
-                    "assistant_type": "adaptive"
+                    "strategy": optimal_strategy.config,
+                    "query_features": query_features.__dict__,
+                    "predicted_performance": optimal_strategy.predicted_performance.__dict__,
+                    "processing_time": processing_time,
+                    "optimization_objective": optimization_objective.value,
+                    "assistant_type": "intelligent_adaptive"
                 }
             )
-            
-            logger.info("查询处理完成")
+
+            self.query_count += 1
+            self.total_processing_time += processing_time
+
+            logger.info(f"查询处理完成，耗时: {processing_time:.3f}s")
             return result
             
         except Exception as e:
@@ -203,6 +251,61 @@ class AdaptiveAssistant(BasicAssistant):
         """获取检索结果（用于调试和展示）"""
         analysis_result = self.query_analyzer.analyze_query(query)
         return self.hybrid_retriever.retrieve(query, analysis_result, strategy)
+
+    def _record_performance(self, query: str, strategy_config: Dict[str, float],
+                           processing_time: float, answer: str):
+        """记录性能用于学习"""
+        try:
+            # 简化的性能评估 (实际应用中需要更复杂的评估)
+            performance = PerformanceMetrics(
+                accuracy=0.8,  # 需要实际评估
+                latency=processing_time,
+                cost=0.05,     # 需要实际计算
+                user_satisfaction=0.8  # 需要用户反馈
+            )
+
+            self.intelligent_learner.record_performance(query, strategy_config, performance)
+        except Exception as e:
+            logger.warning(f"性能记录失败: {e}")
+
+    def get_performance_analytics(self) -> Dict[str, Any]:
+        """获取性能分析"""
+        optimizer_metrics = self.performance_optimizer.get_performance_metrics()
+        cache_stats = self.performance_optimizer.get_cache_statistics()
+
+        return {
+            "query_count": self.query_count,
+            "avg_processing_time": self.total_processing_time / max(self.query_count, 1),
+            "cache_metrics": optimizer_metrics.__dict__,
+            "cache_statistics": cache_stats,
+            "learning_history_size": len(self.intelligent_learner.performance_history),
+            "model_trained": self.intelligent_learner.is_trained
+        }
+
+    def optimize_for_objective(self, objective: OptimizationObjective):
+        """为特定目标优化系统"""
+        logger.info(f"系统优化目标设置为: {objective.value}")
+        # 可以在这里调整系统参数
+
+    def warmup_system(self, sample_queries: List[str]):
+        """系统预热"""
+        logger.info("开始系统预热...")
+        self.performance_optimizer.warmup_cache(
+            sample_queries,
+            self.hybrid_retriever,
+            self._generate_answer
+        )
+        logger.info("系统预热完成")
+
+    def save_learning_state(self, path: str):
+        """保存学习状态"""
+        self.intelligent_learner.save_model(path)
+        logger.info(f"学习状态已保存到: {path}")
+
+    def load_learning_state(self, path: str):
+        """加载学习状态"""
+        self.intelligent_learner.load_model(path)
+        logger.info(f"学习状态已从 {path} 加载")
 
 
 # 便捷函数

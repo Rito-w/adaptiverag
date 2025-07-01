@@ -259,6 +259,8 @@ BASELINE_METHODS = {
     "naive_rag": NaiveRAG,
     "self_rag": SelfRAG,
     "raptor": RAPTOR,
+    "turbo_rag": TurboRAG,
+    "level_rag": LevelRAG,
 }
 
 
@@ -301,3 +303,166 @@ if __name__ == "__main__":
         print(f"答案: {result['answer']}")
         print(f"检索时间: {result['retrieval_time']:.3f}s")
         print(f"生成时间: {result['generation_time']:.3f}s")
+
+
+class TurboRAG(BaseRAGMethod):
+    """TurboRAG 基线方法 - 性能优化重点"""
+
+    def __init__(self, config: Dict[str, Any]):
+        super().__init__(config)
+        self.precomputed_cache = {}  # 预计算缓存
+        self.kv_cache = {}          # KV缓存
+        self.cache_hit_rate = 0.0
+        self.total_queries = 0
+        self.cache_hits = 0
+
+        logger.info("🔧 初始化 TurboRAG (预计算KV缓存优化)")
+
+    def process_query(self, question: str) -> Dict[str, Any]:
+        """TurboRAG 风格的查询处理 - 强调速度"""
+        start_time = time.time()
+        self.total_queries += 1
+
+        # 检查缓存
+        cache_key = hash(question)
+        if cache_key in self.precomputed_cache:
+            self.cache_hits += 1
+            cached_result = self.precomputed_cache[cache_key]
+
+            # 极快的缓存响应
+            time.sleep(0.02)  # 20ms 缓存响应
+
+            total_time = time.time() - start_time
+            self.cache_hit_rate = self.cache_hits / self.total_queries
+
+            return {
+                "answer": cached_result,
+                "retrieval_time": 0.01,
+                "generation_time": 0.01,
+                "total_time": total_time,
+                "cache_hit": True,
+                "cache_hit_rate": self.cache_hit_rate,
+                "method": "turbo_rag"
+            }
+
+        # 缓存未命中，执行快速检索和生成
+        retrieval_result, retrieval_time = self._measure_time(self._fast_retrieve, question)
+        generation_result, generation_time = self._measure_time(
+            self._fast_generate, question, retrieval_result
+        )
+
+        # 缓存结果
+        self.precomputed_cache[cache_key] = generation_result
+
+        total_time = time.time() - start_time
+        self.cache_hit_rate = self.cache_hits / self.total_queries
+
+        return {
+            "answer": generation_result,
+            "retrieval_time": retrieval_time,
+            "generation_time": generation_time,
+            "total_time": total_time,
+            "cache_hit": False,
+            "cache_hit_rate": self.cache_hit_rate,
+            "method": "turbo_rag"
+        }
+
+    def _fast_retrieve(self, question: str) -> List[str]:
+        """快速检索 - 使用预计算优化"""
+        # 模拟预计算KV缓存的快速检索
+        time.sleep(0.05)  # 50ms 快速检索
+        return [
+            f"TurboRAG fast retrieved doc {i+1} for: {question[:40]}..."
+            for i in range(3)  # 较少的文档数量以提高速度
+        ]
+
+    def _fast_generate(self, question: str, contexts: List[str]) -> str:
+        """快速生成 - 使用KV缓存优化"""
+        # 模拟预计算KV缓存的快速生成
+        time.sleep(0.08)  # 80ms 快速生成
+        return f"TurboRAG fast answer: {question[:50]}... (optimized with {len(contexts)} docs)"
+
+
+class LevelRAG(BaseRAGMethod):
+    """LevelRAG 基线方法 - 分层架构"""
+
+    def __init__(self, config: Dict[str, Any]):
+        super().__init__(config)
+        self.high_level_planner = True
+        self.low_level_retrievers = ['sparse', 'dense', 'web']
+        self.decomposition_depth = config.get("decomposition_depth", 2)
+
+        logger.info(f"🔧 初始化 LevelRAG (分层架构, depth={self.decomposition_depth})")
+
+    def process_query(self, question: str) -> Dict[str, Any]:
+        """LevelRAG 分层处理"""
+        start_time = time.time()
+
+        # 第一阶段：高层查询分解
+        decomposition_result, decomposition_time = self._measure_time(
+            self._decompose_query, question
+        )
+
+        # 第二阶段：低层多路检索
+        retrieval_result, retrieval_time = self._measure_time(
+            self._multi_retrieval, decomposition_result
+        )
+
+        # 第三阶段：结果聚合和生成
+        generation_result, generation_time = self._measure_time(
+            self._hierarchical_generate, question, retrieval_result
+        )
+
+        total_time = time.time() - start_time
+
+        return {
+            "answer": generation_result,
+            "decomposition_time": decomposition_time,
+            "retrieval_time": retrieval_time,
+            "generation_time": generation_time,
+            "total_time": total_time,
+            "sub_queries": decomposition_result,
+            "retrieval_paths": len(self.low_level_retrievers),
+            "method": "level_rag"
+        }
+
+    def _decompose_query(self, question: str) -> List[str]:
+        """高层查询分解"""
+        time.sleep(0.1)  # 分解时间
+
+        # 模拟原子查询分解
+        if "compare" in question.lower():
+            return [
+                f"What is {question.split()[1]}?",
+                f"What is {question.split()[-1]}?",
+                "How to compare them?"
+            ]
+        elif "how" in question.lower():
+            return [
+                f"Steps for {question[4:]}",
+                f"Requirements for {question[4:]}"
+            ]
+        else:
+            return [question, f"Context for {question[:20]}..."]
+
+    def _multi_retrieval(self, sub_queries: List[str]) -> Dict[str, List[str]]:
+        """多路检索"""
+        time.sleep(0.15)  # 多路检索时间
+
+        results = {}
+        for retriever in self.low_level_retrievers:
+            results[retriever] = []
+            for sub_query in sub_queries:
+                results[retriever].extend([
+                    f"{retriever} doc for: {sub_query[:30]}..."
+                    for _ in range(2)
+                ])
+
+        return results
+
+    def _hierarchical_generate(self, question: str, retrieval_results: Dict[str, List[str]]) -> str:
+        """分层生成"""
+        time.sleep(0.2)  # 生成时间
+
+        total_docs = sum(len(docs) for docs in retrieval_results.values())
+        return f"LevelRAG hierarchical answer for: {question[:40]}... (using {total_docs} docs from {len(retrieval_results)} retrievers)"
