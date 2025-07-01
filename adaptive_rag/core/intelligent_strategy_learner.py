@@ -194,9 +194,34 @@ class IntelligentStrategyLearner:
             'query_features': query_features,
             'predicted_performance': predicted_performance,
             'confidence': confidence,
-            'reasoning': self._generate_reasoning(query_features, strategy_config)
+            'reasoning': f"Based on complexity={query_features.complexity_score:.2f}, type={query_features.question_type}"
         }
-    
+
+    def _predict_performance(self, query_features: QueryFeatures, strategy_config: Dict[str, float]) -> Dict[str, float]:
+        """预测给定策略的性能"""
+        # 基于查询特征和策略配置预测性能
+        base_accuracy = 0.7
+        base_latency = 200  # ms
+        base_cost = 0.01  # $
+
+        # 根据查询复杂度调整
+        complexity_factor = query_features.complexity_score
+        accuracy = base_accuracy + (1 - complexity_factor) * 0.2
+        latency = base_latency * (1 + complexity_factor * 0.5)
+        cost = base_cost * (1 + complexity_factor * 0.3)
+
+        # 根据策略权重调整
+        if strategy_config.get('web', 0) > 0.3:
+            latency *= 1.5  # Web搜索更慢
+            cost *= 2.0     # Web搜索更贵
+            accuracy += 0.1  # 但可能更准确
+
+        return {
+            'accuracy': min(1.0, max(0.0, accuracy)),
+            'latency': latency,
+            'cost': cost
+        }
+
     def _ml_predict_strategy(self, query_features: QueryFeatures) -> Dict[str, float]:
         """使用机器学习预测策略"""
         try:

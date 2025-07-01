@@ -82,6 +82,9 @@ class DatasetDownloader:
         self.raw_dir.mkdir(exist_ok=True)
         self.processed_dir.mkdir(exist_ok=True)
 
+        # 真实数据路径
+        self.real_data_dir = Path("/root/autodl-tmp/adaptiverag_data/processed")
+
         # 尝试导入 datasets 库用于 FlashRAG 数据集
         try:
             import datasets
