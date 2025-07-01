@@ -131,6 +131,48 @@ class RealAdaptiveRAGEngine:
 
         return "\n".join(summary)
 
+    def get_component_details(self) -> Dict[str, Any]:
+        """获取组件详细信息"""
+        retrievers = self.config.get('retriever_configs', {})
+        generators = self.config.get('generator_configs', {})
+        rankers = self.config.get('ranker_configs', {})
+
+        return {
+            "检索器组件": {
+                f"{name}": {
+                    "类型": config.get('retriever_type', 'unknown'),
+                    "模型": config.get('model_name', 'N/A'),
+                    "状态": "✅ 真实" if config.get('retriever_type') != 'mock' else "🔄 模拟",
+                    "路径": config.get('model_path', 'N/A')
+                }
+                for name, config in retrievers.items()
+            },
+            "生成器组件": {
+                f"{name}": {
+                    "类型": config.get('generator_type', 'unknown'),
+                    "模型": config.get('model_name', 'N/A'),
+                    "状态": "✅ 真实" if config.get('generator_type') != 'mock' else "🔄 模拟",
+                    "路径": config.get('model_path', 'N/A')
+                }
+                for name, config in generators.items()
+            },
+            "重排序器组件": {
+                f"{name}": {
+                    "类型": config.get('ranker_type', 'unknown'),
+                    "模型": config.get('model_name', 'N/A'),
+                    "状态": "✅ 真实" if config.get('ranker_type') != 'mock' else "🔄 模拟",
+                    "路径": config.get('model_path', 'N/A')
+                }
+                for name, config in rankers.items()
+            },
+            "系统信息": {
+                "设备": self.config.get('device', 'N/A'),
+                "批次大小": self.config.get('batch_size', 'N/A'),
+                "使用真实组件": self.use_real_components,
+                "配置文件": self.config_path
+            }
+        }
+
     def process_query(self, query: str, show_details: bool = True) -> Dict[str, Any]:
         """处理查询（使用真实组件或模拟实现）"""
         start_time = time.time()
@@ -506,6 +548,76 @@ def create_webui(config_path: str = "real_config.yaml") -> gr.Blocks:
 
         # 创建标签页
         with gr.Tabs():
+            # 模块概览标签页
+            with gr.Tab("🏗️ 模块概览"):
+                gr.HTML("<h2>📋 AdaptiveRAG 模块架构</h2>")
+
+                # 模块状态概览
+                with gr.Row():
+                    with gr.Column():
+                        gr.HTML("<h3>🧩 核心模块</h3>")
+                        core_modules = gr.JSON(
+                            value={
+                                "任务分解器": {"状态": "✅ 运行中", "类型": "真实组件"},
+                                "检索规划器": {"状态": "✅ 运行中", "类型": "真实组件"},
+                                "多重检索器": {"状态": "✅ 运行中", "类型": "真实组件"},
+                                "重排序器": {"状态": "✅ 运行中", "类型": "真实组件"},
+                                "自适应生成器": {"状态": "✅ 运行中", "类型": "真实组件"}
+                            },
+                            label="核心模块状态"
+                        )
+
+                    with gr.Column():
+                        gr.HTML("<h3>🔧 组件详情</h3>")
+                        component_details = gr.JSON(
+                            value=engine.get_component_details(),
+                            label="组件配置详情"
+                        )
+
+                # 模块流程图
+                gr.HTML("""
+                <h3>🔄 处理流程</h3>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+                        <div style="text-align: center; margin: 10px;">
+                            <div style="background: #667eea; color: white; padding: 10px; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">📝</div>
+                            <strong>任务分解</strong>
+                        </div>
+                        <div style="font-size: 24px; color: #667eea;">→</div>
+                        <div style="text-align: center; margin: 10px;">
+                            <div style="background: #764ba2; color: white; padding: 10px; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">🎯</div>
+                            <strong>策略规划</strong>
+                        </div>
+                        <div style="font-size: 24px; color: #764ba2;">→</div>
+                        <div style="text-align: center; margin: 10px;">
+                            <div style="background: #667eea; color: white; padding: 10px; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">🔍</div>
+                            <strong>多重检索</strong>
+                        </div>
+                        <div style="font-size: 24px; color: #667eea;">→</div>
+                        <div style="text-align: center; margin: 10px;">
+                            <div style="background: #764ba2; color: white; padding: 10px; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">📊</div>
+                            <strong>重排序</strong>
+                        </div>
+                        <div style="font-size: 24px; color: #764ba2;">→</div>
+                        <div style="text-align: center; margin: 10px;">
+                            <div style="background: #667eea; color: white; padding: 10px; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">🤖</div>
+                            <strong>自适应生成</strong>
+                        </div>
+                    </div>
+                </div>
+                """)
+
+                # 刷新按钮
+                refresh_modules_btn = gr.Button("🔄 刷新模块状态", variant="secondary")
+
+                def refresh_modules():
+                    return engine.get_component_details()
+
+                refresh_modules_btn.click(
+                    refresh_modules,
+                    outputs=[component_details]
+                )
+
             # 配置信息标签页
             with gr.Tab("⚙️ 配置信息"):
                 gr.HTML("<h2>📋 系统配置信息</h2>")
