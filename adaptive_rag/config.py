@@ -24,6 +24,60 @@ except ImportError:
 
 
 @dataclass
+class ModuleToggleConfig:
+    """模块开关配置 - 精细控制每个模块的启用状态"""
+
+    # === 核心处理模块 ===
+    task_decomposer: bool = True              # 任务分解器
+    retrieval_planner: bool = True            # 检索规划器
+    multi_retriever: bool = True              # 多重检索系统
+    context_reranker: bool = True             # 上下文重排器
+    adaptive_generator: bool = True           # 自适应生成器
+
+    # === 智能分析模块 ===
+    query_analyzer: bool = True               # 查询分析器
+    strategy_router: bool = True              # 策略路由器
+    performance_optimizer: bool = True        # 性能优化器
+    intelligent_strategy_learner: bool = False # 智能策略学习器（实验性）
+    multi_dimensional_optimizer: bool = False # 多维度优化器（实验性）
+    resource_aware_optimizer: bool = False    # 资源感知优化器（实验性）
+
+    # === 检索器模块 ===
+    keyword_retriever: bool = True            # 关键词检索器
+    dense_retriever: bool = True              # 密集检索器
+    web_retriever: bool = False               # 网络检索器（需要API）
+    hybrid_retriever: bool = True             # 混合检索器
+
+    # === 重排序模块 ===
+    cross_encoder_ranker: bool = True         # 交叉编码器重排
+    colbert_ranker: bool = False              # ColBERT重排（需要模型）
+    gpt_ranker: bool = False                  # GPT重排（需要API）
+
+    # === 生成器模块 ===
+    template_generator: bool = True           # 模板生成器
+    freeform_generator: bool = True           # 自由形式生成器
+    dialogue_generator: bool = False          # 对话生成器（实验性）
+
+    # === 评估模块 ===
+    fact_verification: bool = False           # 事实验证（实验性）
+    confidence_estimation: bool = True        # 置信度估计
+    result_analyzer: bool = True              # 结果分析器
+
+    # === 缓存模块 ===
+    semantic_cache: bool = True               # 语义缓存
+    predictive_cache: bool = False            # 预测性缓存（实验性）
+
+    # === 用户体验模块 ===
+    personalization: bool = False             # 个性化（实验性）
+    multimodal_support: bool = False          # 多模态支持（实验性）
+
+    # === 调试和监控模块 ===
+    debug_mode: bool = False                  # 调试模式
+    performance_monitoring: bool = True       # 性能监控
+    logging_enhanced: bool = True             # 增强日志
+
+
+@dataclass
 class SubTaskConfig:
     """子任务配置"""
     type: str = "factual"  # factual, semantic, temporal, comparative
@@ -148,6 +202,9 @@ class AdaptiveRAGConfig:
 @dataclass
 class FlexRAGIntegratedConfig:
     """深度集成 FlexRAG 的配置类"""
+
+    # === 模块开关配置 ===
+    modules: ModuleToggleConfig = field(default_factory=ModuleToggleConfig)
 
     # 基础配置
     device: str = "cuda"
@@ -838,3 +895,99 @@ if __name__ == "__main__":
     with open("adaptive_rag_config.yaml", "w") as f:
         f.write(EXAMPLE_CONFIG_YAML)
     print("✅ 示例配置文件已保存")
+
+
+# ===== 模块化配置加载函数 =====
+
+def load_modular_config_from_yaml(yaml_path: str) -> FlexRAGIntegratedConfig:
+    """从模块化YAML配置文件加载配置"""
+    with open(yaml_path, 'r', encoding='utf-8') as f:
+        yaml_config = yaml.safe_load(f)
+
+    config = FlexRAGIntegratedConfig()
+
+    # 加载模块开关配置
+    if 'modules' in yaml_config:
+        modules_config = yaml_config['modules']
+        config.modules = ModuleToggleConfig(**modules_config)
+
+    # 加载基础配置
+    if 'basic' in yaml_config:
+        basic_config = yaml_config['basic']
+        config.device = basic_config.get('device', config.device)
+        config.batch_size = basic_config.get('batch_size', config.batch_size)
+        config.max_input_length = basic_config.get('max_input_length', config.max_input_length)
+
+    return config
+
+
+def apply_preset_config(config: FlexRAGIntegratedConfig, preset_name: str, yaml_config: dict) -> FlexRAGIntegratedConfig:
+    """应用预设配置模式"""
+    if 'presets' in yaml_config and preset_name in yaml_config['presets']:
+        preset = yaml_config['presets'][preset_name]
+
+        if 'modules' in preset:
+            # 更新模块开关配置
+            for module_name, enabled in preset['modules'].items():
+                if hasattr(config.modules, module_name):
+                    setattr(config.modules, module_name, enabled)
+
+    return config
+
+
+def create_config_from_yaml(yaml_path: str, preset: str = None) -> FlexRAGIntegratedConfig:
+    """从 YAML 文件创建配置，支持预设模式"""
+    with open(yaml_path, 'r', encoding='utf-8') as f:
+        yaml_config = yaml.safe_load(f)
+
+    # 如果是模块化配置文件
+    if 'modules' in yaml_config:
+        config = load_modular_config_from_yaml(yaml_path)
+
+        # 应用预设配置
+        if preset:
+            config = apply_preset_config(config, preset, yaml_config)
+
+        return config
+
+    # 兼容旧版配置文件
+    config = FlexRAGIntegratedConfig()
+    return config
+
+
+def get_enabled_modules(config: FlexRAGIntegratedConfig) -> Dict[str, bool]:
+    """获取启用的模块列表"""
+    if hasattr(config, 'modules'):
+        return {
+            name: getattr(config.modules, name)
+            for name in dir(config.modules)
+            if not name.startswith('_')
+        }
+    return {}
+
+
+def print_module_status(config: FlexRAGIntegratedConfig):
+    """打印模块启用状态"""
+    enabled_modules = get_enabled_modules(config)
+
+    print("🔧 AdaptiveRAG 模块状态:")
+    print("=" * 50)
+
+    categories = {
+        "核心处理模块": ["task_decomposer", "retrieval_planner", "multi_retriever", "context_reranker", "adaptive_generator"],
+        "智能分析模块": ["query_analyzer", "strategy_router", "performance_optimizer", "intelligent_strategy_learner"],
+        "检索器模块": ["keyword_retriever", "dense_retriever", "web_retriever", "hybrid_retriever"],
+        "重排序模块": ["cross_encoder_ranker", "colbert_ranker", "gpt_ranker"],
+        "生成器模块": ["template_generator", "freeform_generator", "dialogue_generator"],
+        "评估模块": ["fact_verification", "confidence_estimation", "result_analyzer"],
+        "缓存模块": ["semantic_cache", "predictive_cache"],
+        "用户体验模块": ["personalization", "multimodal_support"],
+        "调试监控模块": ["debug_mode", "performance_monitoring", "logging_enhanced"]
+    }
+
+    for category, modules in categories.items():
+        print(f"\n📂 {category}:")
+        for module in modules:
+            if module in enabled_modules:
+                status = "✅ 启用" if enabled_modules[module] else "❌ 禁用"
+                print(f"  {module}: {status}")

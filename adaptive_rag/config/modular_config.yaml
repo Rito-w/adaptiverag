@@ -1,0 +1,316 @@
+# AdaptiveRAG 模块化配置文件
+# 支持精细控制每个模块的开启和关闭
+
+# === 模块开关配置 ===
+modules:
+  # === 核心处理模块 ===
+  task_decomposer: true              # 任务分解器
+  retrieval_planner: true            # 检索规划器
+  multi_retriever: true              # 多重检索系统
+  context_reranker: true             # 上下文重排器
+  adaptive_generator: true           # 自适应生成器
+  
+  # === 智能分析模块 ===
+  query_analyzer: true               # 查询分析器
+  strategy_router: true              # 策略路由器
+  performance_optimizer: true        # 性能优化器
+  intelligent_strategy_learner: false # 智能策略学习器（实验性）
+  multi_dimensional_optimizer: false # 多维度优化器（实验性）
+  resource_aware_optimizer: false    # 资源感知优化器（实验性）
+  
+  # === 检索器模块 ===
+  keyword_retriever: true            # 关键词检索器
+  dense_retriever: true              # 密集检索器
+  web_retriever: false               # 网络检索器（需要API）
+  hybrid_retriever: true             # 混合检索器
+  
+  # === 重排序模块 ===
+  cross_encoder_ranker: true         # 交叉编码器重排
+  colbert_ranker: false              # ColBERT重排（需要模型）
+  gpt_ranker: false                  # GPT重排（需要API）
+  
+  # === 生成器模块 ===
+  template_generator: true           # 模板生成器
+  freeform_generator: true           # 自由形式生成器
+  dialogue_generator: false          # 对话生成器（实验性）
+  
+  # === 评估模块 ===
+  fact_verification: false           # 事实验证（实验性）
+  confidence_estimation: true        # 置信度估计
+  result_analyzer: true              # 结果分析器
+  
+  # === 缓存模块 ===
+  semantic_cache: true               # 语义缓存
+  predictive_cache: false            # 预测性缓存（实验性）
+  
+  # === 用户体验模块 ===
+  personalization: false             # 个性化（实验性）
+  multimodal_support: false          # 多模态支持（实验性）
+  
+  # === 调试和监控模块 ===
+  debug_mode: false                  # 调试模式
+  performance_monitoring: true       # 性能监控
+  logging_enhanced: true             # 增强日志
+
+# === 基础配置 ===
+basic:
+  device: "cuda"
+  batch_size: 4
+  max_input_length: 2048
+
+# === 路径配置 ===
+paths:
+  # 模型路径
+  models_dir: "/root/autodl-tmp/models"
+
+  # 数据路径
+  data_dir: "/root/autodl-tmp"
+  flashrag_data_dir: "/root/autodl-tmp/flashrag_real_data"
+  adaptiverag_data_dir: "/root/autodl-tmp/adaptiverag_data"
+
+  # 缓存路径
+  cache_dir: "/root/autodl-tmp/flashrag_real_data/cache"
+
+  # 输出路径
+  output_dir: "/root/autodl-tmp/test_results"
+  
+# === 任务分解配置 ===
+task_decomposition:
+  max_decompose_depth: 3
+  enable_entity_extraction: true
+  enable_temporal_analysis: true
+  decomposition_threshold: 50  # token数量阈值
+
+# === 检索策略配置 ===
+retrieval_strategy:
+  # 默认权重
+  default_weights:
+    keyword: 0.33
+    dense: 0.33
+    web: 0.34
+  
+  # 任务类型特定权重
+  task_specific_weights:
+    factual:
+      keyword: 0.7
+      dense: 0.2
+      web: 0.1
+    semantic:
+      keyword: 0.2
+      dense: 0.7
+      web: 0.1
+    temporal:
+      keyword: 0.3
+      dense: 0.2
+      web: 0.5
+    comparative:
+      keyword: 0.4
+      dense: 0.4
+      web: 0.2
+
+# === 检索器配置 ===
+retrievers:
+  keyword_retriever:
+    type: "bm25"
+    index_path: "/root/autodl-tmp/flashrag_real_data/cache/keyword_index"
+    top_k: 20
+
+  dense_retriever:
+    type: "dense"
+    model_name: "/root/autodl-tmp/models/e5-base-v2"  # 使用您的本地模型
+    model_name_fallback: "intfloat/e5-base-v2"  # 备用在线模型名
+    index_path: "/root/autodl-tmp/flashrag_real_data/cache/vector_index"
+    top_k: 20
+    device: "cuda"
+
+  web_retriever:
+    type: "web"
+    search_engine: "google"
+    api_key: null  # 需要配置API密钥
+    top_k: 10
+
+# === 重排序配置 ===
+rerankers:
+  cross_encoder:
+    model_name: "/root/autodl-tmp/models/bge-reranker-base"  # 使用您的本地重排序模型
+    model_name_fallback: "BAAI/bge-reranker-base"  # 备用在线模型名
+    top_k: 10
+    device: "cuda"
+
+  colbert:
+    model_name: "colbert-ir/colbertv2.0"
+    top_k: 10
+
+  gpt_ranker:
+    model_name: "gpt-3.5-turbo"
+    api_key: null  # 需要配置API密钥
+    top_k: 10
+
+# === 生成器配置 ===
+generators:
+  main_generator:
+    type: "huggingface"
+    model_name: "/root/autodl-tmp/models/Qwen2.5-1.5B-Instruct"  # 使用您的本地Qwen模型
+    model_name_fallback: "Qwen/Qwen2.5-1.5B-Instruct"  # 备用在线模型名
+    max_tokens: 2048
+    temperature: 0.1
+    top_p: 0.9
+    device: "cuda"
+    torch_dtype: "float16"  # 节省显存
+
+  large_generator:
+    type: "huggingface"
+    model_name: "/root/autodl-tmp/models/Qwen2.5-7B-Instruct"  # 大模型，需要更多显存
+    model_name_fallback: "Qwen/Qwen2.5-7B-Instruct"
+    max_tokens: 2048
+    temperature: 0.1
+    top_p: 0.9
+    device: "cuda"
+    torch_dtype: "float16"
+
+  small_generator:
+    type: "huggingface"
+    model_name: "/root/autodl-tmp/models/Qwen1.5-1.8B-Chat"  # 小模型，快速响应
+    model_name_fallback: "Qwen/Qwen1.5-1.8B-Chat"
+    max_tokens: 1024
+    temperature: 0.2
+    top_p: 0.9
+    device: "cuda"
+    torch_dtype: "float16"
+
+# === 缓存配置 ===
+cache:
+  semantic_cache:
+    similarity_threshold: 0.85
+    max_cache_size: 1000
+  
+  predictive_cache:
+    prediction_window: 5  # 预测未来5个查询
+    confidence_threshold: 0.7
+
+# === 性能优化配置 ===
+performance:
+  resource_monitoring:
+    cpu_threshold: 80.0      # CPU使用率阈值
+    memory_threshold: 80.0   # 内存使用率阈值
+    gpu_threshold: 90.0      # GPU使用率阈值
+  
+  optimization_mode: "balanced"  # performance, efficiency, balanced, conservative
+
+# === 评估配置 ===
+evaluation:
+  metrics: ["em", "f1", "rouge_l", "bertscore"]
+  fact_verification:
+    sources: ["wikipedia", "google"]
+    confidence_threshold: 0.8
+
+# === 日志配置 ===
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  save_to_file: true
+  log_file: "adaptive_rag.log"
+
+# === 数据路径配置 ===
+data:
+  # 使用您的真实数据
+  corpus_path: "/root/autodl-tmp/flashrag_real_data/hotpotqa_dev.jsonl"  # 主要数据集
+  corpus_path_train: "/root/autodl-tmp/flashrag_real_data/hotpotqa_train.jsonl"  # 训练数据
+  corpus_path_triviaqa: "/root/autodl-tmp/flashrag_real_data/triviaqa_dev.jsonl"  # 备用数据集
+
+  # 索引路径
+  index_path: "/root/autodl-tmp/flashrag_real_data/cache/e5_Flat.index"
+  bm25_index_path: "/root/autodl-tmp/flashrag_real_data/cache/bm25_index.pkl"
+
+  # 缓存和输出
+  cache_dir: "/root/autodl-tmp/flashrag_real_data/cache"
+  output_dir: "/root/autodl-tmp/test_results"
+
+  # 数据集选择
+  dataset_name: "hotpotqa"  # hotpotqa, triviaqa
+  split: "dev"  # dev, train, test
+
+# === 实验配置 ===
+experiment:
+  name: "adaptive_rag_experiment"
+  save_intermediate_results: true
+  enable_ablation_study: false
+  random_seed: 42
+
+# === 预设配置模式 ===
+# 用户可以通过选择预设模式快速配置系统
+presets:
+  # 基础模式：只启用核心功能
+  basic_mode:
+    modules:
+      task_decomposer: true
+      retrieval_planner: true
+      multi_retriever: true
+      context_reranker: false
+      adaptive_generator: true
+      query_analyzer: true
+      strategy_router: false
+      keyword_retriever: true
+      dense_retriever: true
+      web_retriever: false
+      cross_encoder_ranker: false
+      template_generator: true
+      semantic_cache: true
+  
+  # 高性能模式：启用所有稳定功能
+  performance_mode:
+    modules:
+      task_decomposer: true
+      retrieval_planner: true
+      multi_retriever: true
+      context_reranker: true
+      adaptive_generator: true
+      query_analyzer: true
+      strategy_router: true
+      performance_optimizer: true
+      keyword_retriever: true
+      dense_retriever: true
+      web_retriever: true
+      hybrid_retriever: true
+      cross_encoder_ranker: true
+      template_generator: true
+      freeform_generator: true
+      semantic_cache: true
+      confidence_estimation: true
+      result_analyzer: true
+      performance_monitoring: true
+  
+  # 实验模式：启用所有功能包括实验性功能
+  experimental_mode:
+    modules:
+      task_decomposer: true
+      retrieval_planner: true
+      multi_retriever: true
+      context_reranker: true
+      adaptive_generator: true
+      query_analyzer: true
+      strategy_router: true
+      performance_optimizer: true
+      intelligent_strategy_learner: true
+      multi_dimensional_optimizer: true
+      resource_aware_optimizer: true
+      keyword_retriever: true
+      dense_retriever: true
+      web_retriever: true
+      hybrid_retriever: true
+      cross_encoder_ranker: true
+      colbert_ranker: true
+      gpt_ranker: true
+      template_generator: true
+      freeform_generator: true
+      dialogue_generator: true
+      fact_verification: true
+      confidence_estimation: true
+      result_analyzer: true
+      semantic_cache: true
+      predictive_cache: true
+      personalization: true
+      multimodal_support: true
+      debug_mode: true
+      performance_monitoring: true
+      logging_enhanced: true

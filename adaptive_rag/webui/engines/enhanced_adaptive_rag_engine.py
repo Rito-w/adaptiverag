@@ -44,6 +44,18 @@ except ImportError:
     PERFORMANCE_OPTIMIZER_AVAILABLE = False
     logger.warning("性能优化器不可用")
 
+# 导入模块管理器
+try:
+    from adaptive_rag.core.module_manager import ModuleManager
+    from adaptive_rag.config import (
+        create_config_from_yaml, ModuleToggleConfig,
+        FlexRAGIntegratedConfig, get_enabled_modules
+    )
+    MODULE_MANAGER_AVAILABLE = True
+except ImportError:
+    MODULE_MANAGER_AVAILABLE = False
+    logger.warning("模块管理器不可用")
+
 
 class EnhancedAdaptiveRAGEngine:
     """增强版 AdaptiveRAG 引擎 - 集成所有优化模块"""
@@ -67,6 +79,10 @@ class EnhancedAdaptiveRAGEngine:
         logger.info("🤖 步骤3: 初始化真实组件...")
         self.initialize_real_components()
         logger.info("✅ 真实组件初始化完成")
+
+        logger.info("🎛️ 步骤4: 初始化模块管理器...")
+        self.initialize_module_manager()
+        logger.info("✅ 模块管理器初始化完成")
 
         logger.info("🎉 增强版 AdaptiveRAG 引擎初始化完成")
         logger.info(f"   配置文件: {self.config_path}")
@@ -509,4 +525,97 @@ class EnhancedAdaptiveRAGEngine:
             "token_count": 20,
             "processing_time": 0.3,
             "status": "✅ 完成（模拟）"
-        } 
+        }
+
+    def initialize_module_manager(self):
+        """初始化模块管理器"""
+        if MODULE_MANAGER_AVAILABLE:
+            try:
+                # 尝试从配置文件创建模块化配置
+                modular_config_path = "adaptive_rag/config/modular_config.yaml"
+                if Path(modular_config_path).exists():
+                    self.modular_config = create_config_from_yaml(modular_config_path, preset="performance_mode")
+                else:
+                    # 创建默认配置
+                    self.modular_config = FlexRAGIntegratedConfig()
+                    self.modular_config.modules = ModuleToggleConfig()
+
+                # 初始化模块管理器
+                self.module_manager = ModuleManager(self.modular_config)
+                self.module_manager.initialize_modules()
+
+                logger.info("✅ 模块管理器初始化成功")
+            except Exception as e:
+                logger.error(f"❌ 模块管理器初始化失败: {e}")
+                self.module_manager = None
+                self.modular_config = None
+        else:
+            logger.warning("⚠️ 模块管理器不可用")
+            self.module_manager = None
+            self.modular_config = None
+
+    def update_module_config(self, module_config: Dict[str, bool]):
+        """更新模块配置"""
+        try:
+            if self.modular_config and hasattr(self.modular_config, 'modules'):
+                # 更新模块开关配置
+                for module_name, enabled in module_config.items():
+                    if hasattr(self.modular_config.modules, module_name):
+                        setattr(self.modular_config.modules, module_name, enabled)
+
+                # 重新初始化模块管理器
+                if self.module_manager:
+                    self.module_manager = ModuleManager(self.modular_config)
+                    self.module_manager.initialize_modules()
+
+                logger.info(f"✅ 模块配置已更新，启用模块数: {sum(module_config.values())}")
+                return True
+            else:
+                logger.warning("⚠️ 模块配置对象不可用")
+                return False
+        except Exception as e:
+            logger.error(f"❌ 更新模块配置失败: {e}")
+            return False
+
+    def get_module_status(self) -> Dict[str, Any]:
+        """获取模块状态"""
+        try:
+            if self.module_manager:
+                status = self.module_manager.get_module_status()
+                enabled_modules = self.module_manager.get_enabled_modules()
+
+                return {
+                    "module_status": status,
+                    "enabled_modules": enabled_modules,
+                    "enabled_count": len(enabled_modules),
+                    "total_count": len(status),
+                    "status": "✅ 模块管理器正常运行"
+                }
+            else:
+                return {
+                    "module_status": {},
+                    "enabled_modules": [],
+                    "enabled_count": 0,
+                    "total_count": 0,
+                    "status": "⚠️ 模块管理器不可用"
+                }
+        except Exception as e:
+            logger.error(f"❌ 获取模块状态失败: {e}")
+            return {
+                "module_status": {},
+                "enabled_modules": [],
+                "enabled_count": 0,
+                "total_count": 0,
+                "status": f"❌ 获取状态失败: {e}"
+            }
+
+    def get_current_module_config(self) -> Dict[str, bool]:
+        """获取当前模块配置"""
+        try:
+            if self.modular_config and hasattr(self.modular_config, 'modules'):
+                return get_enabled_modules(self.modular_config)
+            else:
+                return {}
+        except Exception as e:
+            logger.error(f"❌ 获取模块配置失败: {e}")
+            return {}

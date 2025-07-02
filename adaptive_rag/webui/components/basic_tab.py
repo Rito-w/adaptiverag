@@ -18,44 +18,51 @@ def create_basic_tab(engine) -> Dict[str, gr.Component]:
                 # 模型配置
                 gr.HTML("<h4>📦 模型配置</h4>")
                 
+                # 兼容不同的配置对象
+                def safe_get_config(key, default):
+                    if hasattr(engine.config, 'get'):
+                        return engine.config.get(key, default)
+                    else:
+                        return getattr(engine.config, key, default)
+
                 dense_model_path = gr.Textbox(
                     label="向量检索模型路径",
-                    value=engine.config.get('dense_model_path', "./adaptive_rag/models/e5-base-v2"),
+                    value=safe_get_config('dense_model_path', "/root/autodl-tmp/models/e5-base-v2"),
                     placeholder="/path/to/dense/model"
                 )
 
                 generator_model_path = gr.Textbox(
                     label="生成模型路径",
-                    value=engine.config.get('generator_model_path', "./adaptive_rag/models/qwen1.5-1.8b"),
+                    value=safe_get_config('generator_model_path', "/root/autodl-tmp/models/Qwen2.5-1.5B-Instruct"),
                     placeholder="/path/to/generator/model"
                 )
 
                 reranker_model_path = gr.Textbox(
                     label="重排序模型路径",
-                    value=engine.config.get('reranker_model_path', "./adaptive_rag/models/bge-reranker-base"),
+                    value=safe_get_config('reranker_model_path', "/root/autodl-tmp/models/bge-reranker-base"),
                     placeholder="/path/to/reranker/model"
                 )
-            
+
             with gr.Column(scale=1):
                 # 数据配置
                 gr.HTML("<h4>📊 数据配置</h4>")
-                
+
                 corpus_path = gr.Textbox(
                     label="语料库路径",
-                    value=engine.config.get('corpus_path', "./adaptive_rag/data/general_knowledge.jsonl"),
+                    value=safe_get_config('corpus_path', "/root/autodl-tmp/flashrag_real_data/hotpotqa_dev.jsonl"),
                     placeholder="/path/to/corpus.jsonl"
                 )
 
                 index_path = gr.Textbox(
                     label="索引路径",
-                    value=engine.config.get('index_path', "./adaptive_rag/data/e5_Flat.index"),
+                    value=safe_get_config('index_path', "/root/autodl-tmp/flashrag_real_data/cache/e5_Flat.index"),
                     placeholder="/path/to/index"
                 )
 
                 batch_size = gr.Slider(
                     minimum=1,
                     maximum=32,
-                    value=engine.config.get('batch_size', 4),
+                    value=safe_get_config('batch_size', 4),
                     step=1,
                     label="批处理大小"
                 )
