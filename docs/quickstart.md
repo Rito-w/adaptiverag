@@ -11,6 +11,14 @@ pip install adaptiverag
 ```
 
 ## 🎯 基本用法
+### 启动 webui
+
+```bash
+source /etc/network_turbo
+conda activate flexrag
+cd /root/my_project
+python3 -m adaptiverag.adaptive_rag.webui.enhanced_main_interface --port 7863 --host 0.0.0.0 --config-path adaptiverag/configs/real_config_enhanced.yaml
+```
 
 ### 您的第一个 AdaptiveRAG 查询
 

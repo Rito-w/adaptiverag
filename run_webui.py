@@ -86,7 +86,7 @@ def check_dependencies():
         'torch',
         'transformers',
         'sentence_transformers',
-        'faiss-cpu',
+        'faiss',
         'numpy',
         'pandas',
         'yaml'
