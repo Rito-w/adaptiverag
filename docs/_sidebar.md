@@ -22,7 +22,7 @@
 
 * **核心概念**
   * [🏗️ 架构](architecture.md)
-  * [📊 图表和可视化](diagrams.md)
+  * [📊 图表和可视化（详细流程图）](diagrams.md)
   * [🧠 任务分解](task-decomposition.md)
   * [🔍 检索规划](retrieval-planning.md)
   * [🔗 多重检索器融合](multi-retriever.md)

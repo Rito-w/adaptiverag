@@ -266,13 +266,35 @@ pie title Component Contribution to Performance
 
 To include these diagrams in your documentation, simply use the `mermaid` code block:
 
-````markdown
 ```mermaid
-graph LR
-    A[Start] --> B[Process]
-    B --> C[End]
+flowchart TD
+    A[用户] -->|输入查询| B[WebUI/API/CLI]
+    B -->|请求| C[AdaptiveRAG 引擎]
+    C --> D[任务分解器 TaskDecomposer]
+    D -->|子任务列表| E[检索策略规划 RetrievalPlanner]
+    E -->|检索计划| F[多模态检索器 FlexRAGIntegratedRetriever]
+    F -->|检索文档| G[智能重排序 FlexRAGIntegratedRanker]
+    G -->|排序文档| H[自适应生成 FlexRAGIntegratedGenerator]
+    H -->|答案| I[结果聚合与返回]
+    I -->|最终答案| J[用户]
+    
+    subgraph 外部依赖
+        K[LLM/大模型]
+        L[向量数据库]
+        M[文件系统/知识库]
+        N[Web 检索API]
+    end
+    
+    D --调用LLM--> K
+    F --向量检索--> L
+    F --文件检索--> M
+    F --Web检索--> N
+    H --生成调用--> K
+    
+    C -.->|日志/监控| O[日志系统]
+    C -.->|缓存| P[缓存管理器]
+    C -.->|配置| Q[配置管理器]
 ```
-````
 
 ### Supported Diagram Types
 
